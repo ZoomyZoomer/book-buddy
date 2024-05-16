@@ -1,0 +1,226 @@
+html, body {
+
+    width: 100%;
+    scroll-behavior: smooth;
+    margin: 0;
+    font-family: "Martel Sans";
+    
+}
+
+h1 {
+
+    font-size: 44px;
+    font-weight: bold;
+    color: #30313D;
+
+}
+
+h4 {
+
+    font-size: 14px;
+    font-weight: 300;
+    color: #30313D;
+
+}
+
+h5 {
+
+    font-size: 12px;
+    font-weight: 300;
+    color: #30313D;
+
+}
+
+green {
+
+    color: #06ab78;
+
+}
+
+.navBar {
+
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    margin-right: 5%;
+
+}
+
+.mainContentContainer {
+
+    display:flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.mainContentGrid {
+
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-top: 25px;
+
+}
+
+.flexMiddle {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+}
+
+.flexRight {
+
+    display: flex;
+    justify-content: right;
+    align-items: center;
+
+}
+
+.flexLeft {
+
+    display: flex;
+    justify-content: left;
+    align-items: center;
+
+}
+
+.searchContainer {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    margin-top: 100px;
+
+}
+
+.searchGrid {
+
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+
+}
+
+.searchCircle {
+
+    background-color: #06ab78;
+    border-radius: 100%;
+    height: 27px;
+    width: 27px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    margin-left: 5px;
+    left: 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    transition: height 0.3s ease, width 0.3s ease;
+
+}
+
+.svg {
+
+    width: 60%;
+    height: 60%;
+    transition: opacity 0.3s ease;
+
+}
+
+.searchCircle:hover {
+
+    transition: height 0.3s ease, width 0.3s ease;
+    height: 30px;
+    width: 30px;
+
+}
+
+.noOutline {
+
+    outline: none;
+    border: none;
+    border-style: none;
+
+}
+
+.noBoldBorder {
+
+    outline: none;
+
+}
+
+.searchHistory {
+
+    box-shadow: 0px 10px 20px rgb(196, 196, 196);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+
+}
+
+.historyEntry:hover {
+
+    background-color: #c1eee0;
+    cursor: default;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    width: 100%;
+
+}
+
+.searchBoxShadow {
+
+   
+    border-radius: 0px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+
+}
+
+.historyEntry {
+
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-right: 50px;
+
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    width: 100%;
+    position: relative;
+
+}
+
+.searchBorderRadius {
+
+    border-radius: 100px;
+
+}
+
+.XHistory {
+
+    position: absolute;
+    right: 0;
+    margin-right: 15px;
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.XHistory:hover {
+
+    background-color: #88cfb9;
+    border-radius: 100%;
+    
+
+}

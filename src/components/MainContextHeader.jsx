@@ -1,6 +1,7 @@
 import React from 'react'
 import SearchBar from './SearchBar'
 import { useState } from 'react';
+import { ReactComponent as Logo } from '../logo.svg';
 
 function MainContextHeader() {
 
@@ -36,6 +37,9 @@ function MainContextHeader() {
         <div className="mainContentGrid">
             
             <div className="flexMiddle">
+                <div style={{marginRight: '15px'}}>
+                    <Logo /> 
+                </div>
                 <h1 style={{cursor: 'pointer'}}>
                     <green>BOOK</green> BUDDY
                 </h1>

@@ -67,14 +67,9 @@ function Navbar() {
       <div className="flexRight" style={{width: '100%'}}>
 
         <div className="flexRight" style={{marginRight: '40px'}}>
-          <Link id="login" to="/login">
+          <Link id="signin" to="/signin">
             <button className="loginButton" style={{ fontSize: '12px', fontWeight: 'bold', cursor: 'pointer'}}>
-              LOGIN
-            </button>
-          </Link>
-          <Link id="signup" to="/signup">
-            <button className="loginButton" style={{ fontSize: '12px', fontWeight: 'bold', cursor: 'pointer'}}>
-              SIGN UP
+              SIGN IN
             </button>
           </Link>
 

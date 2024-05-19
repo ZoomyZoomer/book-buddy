@@ -4,7 +4,12 @@ html, body {
     scroll-behavior: smooth;
     margin: 0;
     font-family: "Martel Sans";
+    color: #30313D;
     
+}
+
+a {
+  text-decoration: none;
 }
 
 h1 {
@@ -456,4 +461,84 @@ green {
 
   .loginButton:hover {
     background-color: #30c495;
+  }
+
+  .loginGrid {
+    display: grid;  
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+  }
+
+  .inputBox {
+    height: 30px;
+    width: 300px;
+    border-width: 1px;
+    border-radius: 5px;
+    outline-color: #0969da;
+    border-color: rgb(184, 184, 184);
+    border-style: solid;
+    padding-left: 10px;
+  }
+
+  .submitButton {
+    color: white;
+    font-weight: bold;
+    background-color: #06ab78;
+    border: none;
+    border-radius: 5px;
+    height: 35px;
+    width: 300px;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .submitButton:hover {
+    cursor: pointer;
+    background-color: #30c495;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .loginContainer {
+    padding: 30px;
+    background-color: #f6f8fa;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(221, 221, 221);
+    border-radius: 10px;
+  }
+
+  .newUserContainer {
+    padding: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(221, 221, 221);
+    border-radius: 10px;
+    margin-top: 20px;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    width: 75%;
+  }
+
+  .clickLink {
+
+    font-size: 12px;
+    color: #0969da;
+    cursor: pointer;
+
+  }
+
+  .separator {
+    height: 1px;
+    width: 40px;
+    background-color: rgb(221, 221, 221);
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+
+  .circle {
+    height: 3px;
+    width: 3px;
+    border-radius: 100%;
+    background-color: rgb(221, 221, 221);
   }

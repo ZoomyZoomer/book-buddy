@@ -28,12 +28,13 @@ app.get('/', (req, res) => {
 
 app.post('/register', async(req, res) => {
 
-    const {username, password} = req.body;
+    const {username, password, email} = req.body;
 
     try {
 
         const userDoc = await User.create({
             username,
+            email,
             password:bcrypt.hashSync(password, salt),
         });
 
@@ -46,13 +47,20 @@ app.post('/register', async(req, res) => {
 
 })
 
-app.post('/login', async(req, res) => {
+app.post('/signin', async(req, res) => {
 
     const {username, password} = req.body;
 
     try {
 
-        const userDoc = await User.findOne({username});
+        let userDoc = await User.findOne({username: username});
+
+        if (!userDoc){
+
+            userDoc = await User.findOne({email: username});
+
+        }
+
         const validPassword = bcrypt.compareSync(password, userDoc.password);
 
         if (validPassword){

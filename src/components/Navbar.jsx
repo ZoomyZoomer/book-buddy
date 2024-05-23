@@ -1,15 +1,49 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { faGear } from '@fortawesome/free-solid-svg-icons'
 import { ReactComponent as MySlash } from '../slash.svg'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
 
 
 function Navbar() {
 
+  const [userInfo, setUserInfo] = useState({});
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/profile', {
+          withCredentials: true,
+        });
+        setUserInfo(response.data.user);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  async function logout() {
+
+    try {
+
+      await axios.post('http://localhost:4000/logout');
+
+      setUserInfo('');
+      navigate('/');
+
+    } catch(e){
+      console.log(e);
+    }
+
+  }
 
   return (
     <>
@@ -49,9 +83,9 @@ function Navbar() {
         <MySlash />
 
         <div className="unactiveBlack">
-          <div>
+          <Link className="unactiveBlack" to="/bookshelf">
             BOOKSHELF
-          </div>
+          </Link>
         </div>
 
         <MySlash />
@@ -67,11 +101,18 @@ function Navbar() {
       <div className="flexRight" style={{width: '100%'}}>
 
         <div className="flexRight" style={{marginRight: '40px'}}>
+          {(Object.keys(userInfo).length <= 0) && 
           <Link id="signin" to="/signin">
             <button className="loginButton" style={{ fontSize: '12px', fontWeight: 'bold', cursor: 'pointer'}}>
               SIGN IN
             </button>
           </Link>
+          }
+          {(Object.keys(userInfo).length > 0) && 
+            <button className="loginButton" onClick={logout} style={{ fontSize: '12px', fontWeight: 'bold', cursor: 'pointer'}}>
+              LOG OUT
+            </button>
+          }
 
             <FontAwesomeIcon 
                 icon={faUser} size="xl" 

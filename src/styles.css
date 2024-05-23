@@ -542,3 +542,144 @@ green {
     border-radius: 100%;
     background-color: rgb(221, 221, 221);
   }
+
+  .errorGrid {
+    display: grid;
+    grid-template-columns: 1fr, 1fr;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+  }
+
+  .errorHeading {
+
+    color:#06ab78;
+    font-size: 40px;
+    font-weight: bold;
+
+  }
+
+  .errorSubText {
+
+    font-size: 16px;
+    font-weight: 400;
+
+  }
+
+  #link {
+    color: #969696;
+  }
+
+  .chooseBookContainer {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+  }
+
+  .chooseBookGrid {
+    display: grid;
+    grid-template-columns: 1fr, 1fr;
+    margin-left: 20px;
+  }
+
+  .imageFlex {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+  }
+
+  .bookTitle {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .bookAuthor {
+    font-family: "Inter";
+    font-size: 18px;
+    color: gray;
+  }
+
+  .fiction {
+    border-style: solid;
+    border-color: orange;
+    border-radius: 100px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    height: 15px;
+    max-width: fit-content;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 20px;
+    border-width: 2px;
+  }
+
+  .fictionCircle {
+    border-radius: 100px;
+    width: 10px;
+    height: 10px;
+    background-color: orange;
+    margin-left: 10px;
+  }
+
+  .genreFiction {
+    margin-left: 10px;
+    margin-right: 10px;
+    color: orange;
+    font-size: 14px;
+  }
+
+  .chartContainer {
+    width: 300px; /* Set desired width */
+    height: 300px; /* Set desired height */
+    margin: auto; /* Center the chart */
+}
+
+.bookshelfContainer {
+
+   display: flex;
+   align-items: center;
+   height: 100%;
+   width: 100%;
+   margin-top: 100px;
+
+}
+
+.bookshelfNavbar {
+
+  height: 8vh;
+  background-color: #06AB78;
+  width: 70%;
+  box-shadow: 5px 5px 10px rgb(177, 206, 192);
+  z-index: 3;
+
+}
+
+.bookshelfNavbarContainer {
+
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  width: 70%;
+
+}
+
+.libraryContainer {
+
+  height: 70vh;
+  width: 70%;
+  background-color: #F8F9FD;
+
+}
+
+.bookshelfGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: right;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}

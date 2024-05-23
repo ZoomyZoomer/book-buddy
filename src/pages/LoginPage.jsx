@@ -2,13 +2,38 @@ import React, { useState } from 'react'
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactComponent as Logo } from '../logo.svg';
+import { useEffect, useContext } from 'react';
+import { UserContext } from '../components/UserContext';
+
 
 function LoginPage() {
 
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+
+    const [userInfo, setUserInfo] = useState({});
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+          try {
+            const response = await axios.get('http://localhost:4000/profile', {
+              withCredentials: true,
+            });
+            setUserInfo(response.data.user);
+
+            if (response.data.user){
+                navigate('/error');
+            }
+            
+          } catch (e) {
+            console.log(e);
+          }
+        };
+    
+        fetchProfile();
+      }, []);
 
     async function submit(e){
 
@@ -25,7 +50,8 @@ function LoginPage() {
             });
     
             if (response.status === 200) {
-                alert("Login successful");
+                console.log("Login successful");
+                navigate('/');
             } else {
                 alert("Login failed");
             }

@@ -12,7 +12,8 @@ const UserSchema = new Schema({
                 return /^[\w-]+(?:\.[\w-]+)*@(?:[\w-]+\.)+[a-zA-Z]{2,7}$/.test(v);
             },
             message: props => `${props.value} is not a valid email address!`
-        }
+        },
+        unique: true,
     },
     password: {type: String, required: true},
 });

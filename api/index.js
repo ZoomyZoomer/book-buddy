@@ -1,13 +1,17 @@
 const express = require('express');
 const User = require('./models/User');
+const Quest = require('./models/Quests');
 const cors = require('cors');
 const app = express();
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const QuestsModel = require('./models/Quests');
+const cookieParser = require('cookie-parser');
 
 app.use(express.json());
 app.use(cors({credentials:true, origin:'http://localhost:3000'}));
+app.use(cookieParser());
 
 mongoose.set('strictQuery', false);
 mongoose.connect("mongodb+srv://kcw90:oJQDQrLG9h466RKf@cluster0.ajxucqi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -32,11 +36,20 @@ app.post('/register', async(req, res) => {
 
     try {
 
+        // User info data
         const userDoc = await User.create({
             username,
             email,
             password:bcrypt.hashSync(password, salt),
         });
+
+        // Quest data
+        const questDoc = await Quest.create({
+            username,
+            daily1: [{ finished: false, id: "1" }],
+            daily2: [{ finished: false, id: "2" }],
+            daily3: [{ finished: false, id: "3" }]
+        })
 
         res.json(userDoc);
 
@@ -83,6 +96,39 @@ app.post('/signin', async(req, res) => {
     }
 
 })
+
+app.get('/profile', (req, res) => {
+
+    const { token } = req.cookies;
+
+    if (!token) {
+
+        // No token means not logged in
+        return res.status(401).json({ message: 'Not logged in '});
+
+    }
+
+    jwt.verify(token, secret, {}, (err, info) => {
+
+        if (err){
+            // If there is an error, user isn't logged in
+            return res.status(401).json({ message: 'Not logged in, invalid token'});
+        }
+
+        // Verification successful
+        res.status(200).json({ message: 'Logged in', user: info});
+
+    })
+
+})
+
+app.post('/logout', (req, res) => {
+
+    // Clear the 'token' cookie by setting it to null and expiring it immediately
+    res.cookie('token', null, { expires: new Date(0), httpOnly: true });
+    res.json('Logged out successfully');
+    
+  });
 
 app.listen(4000, () => {
     console.log("port connected");

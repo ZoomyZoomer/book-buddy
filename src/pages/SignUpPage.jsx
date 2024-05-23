@@ -1,16 +1,44 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactComponent as Logo } from '../logo.svg';
+import { useEffect } from 'react';
 
 function SignUpPage() {
 
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
 
+    const [userInfo, setUserInfo] = useState({});
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+          try {
+            const response = await axios.get('http://localhost:4000/profile', {
+              withCredentials: true,
+            });
+            setUserInfo(response.data.user);
+
+            if (response.data.user){
+                navigate('/error');
+            }
+
+            console.log(userInfo);
+            
+          } catch (e) {
+            console.log(e);
+          }
+        };
+    
+        fetchProfile();
+      }, []);
+
+
+
+    
     async function submit(e){
 
         e.preventDefault();
@@ -28,6 +56,7 @@ function SignUpPage() {
     
             if (response.status === 200) {
                 alert("Registration successful");
+                navigate('/signin')
             } else {
                 alert("Registration failed");
             }

@@ -130,27 +130,29 @@ function BookshelfPage() {
             <div className="flexRight">
               <div className="libraryContainer"> 
 
-                <div className="addBookContainer" onClick={() => navigate('/add')}>
-
-                  <div className="flexMiddle">
-                    <AddBook tabName={tabName}/>
-                  </div>
-                  <div className="addBookText">
-                    Add Book
-                  </div>
-
-                </div>
-
-                <div>
                   {bookDetailsArray.map((book, index) => (
-                    <Book_small
-                      key={index}
-                      title={book.items[0].volumeInfo.title}
-                      coverImage={book.items[0].volumeInfo.imageLinks?.smallThumbnail}
-                      author = {book.items[0].volumeInfo.authors}
-                    />
+                    <div style={{marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <Book_small
+                        key={index}
+                        title={book.items[0].volumeInfo.title}
+                        coverImage={book.items[0].volumeInfo.imageLinks?.smallThumbnail}
+                        author = {book.items[0].volumeInfo.authors[0]}
+                        rating = {book.items[0].volumeInfo.averageRating}
+                      />
+                    </div>
                   ))}
-                </div>
+
+                  <div className="addBookContainer" onClick={() => navigate('/add')}>
+
+                    <div className="flexMiddle">
+                      <AddBook tabName={tabName}/>
+                    </div>
+                    <div className="addBookText">
+                      Add Book
+                    </div>
+
+                  </div>
+                
 
 
               </div> 

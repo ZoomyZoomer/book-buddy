@@ -667,9 +667,14 @@ green {
 
 .libraryContainer {
 
-  height: 70vh;
+  height: 100%;
   width: 70%;
-  background-color: #F8F9FD;
+  padding-bottom: 20px;
+  background-color: #f1f3f8;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  justify-content: center;
 
 }
 
@@ -683,7 +688,7 @@ green {
 
 .bookshelfNavbar {
 
-  height: 8vh;
+  height: 6vh;
   background-color: #06AB78;
   width: 70%;
   box-shadow: 0px 0px 5px rgb(112, 131, 121);
@@ -855,13 +860,10 @@ input:focus {
 
 .addBookContainer {
 
-  padding-top: 20px;
-  padding-bottom: 20px;
-  padding-left: 26px;
-  padding-right: 26px;
+  width: 293px;
+  height: 138px;
   background-color: white;
-  max-width: fit-content;
-  margin-left: 26px;
+  margin-left: 16px;
   margin-top: 26px;
   border-radius: 15px;
   display: flex;
@@ -883,28 +885,105 @@ input:focus {
 
 .book_small_container {
 
-  width: 360px;
-  background-color: white;
-  margin-left: 26px;
+  width: 310px;
+  height: 160px;
+  background-color: #FBFCFE;
+  margin-top: 16px;
   border-radius: 15px;
-
+  padding-right: 50px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  cursor: pointer;
+  position: relative;
+  transform: scale(0.9);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 
 }
 
 .image_small {
 
-  transform: scale(0.7);
+  height: 130px;
+  max-width: 90px;
 
 }
 
 .book_small_grid {
   display: grid;
   grid-template-columns: 1fr;
-  margin-left: 30px;
+  margin-left: 40px;
 }
 
 .book_small_image_container {
   display: flex;
   justify-content: left;
   align-items: center;
+  margin-left: 16px;
+}
+
+.genre_tag_container {
+  border-radius: 20px;
+  max-width: fit-content;
+  padding-left: 8px;
+  padding-right: 8px;
+  height: 24px;
+  background-color: #FFF3F3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.genre_circle {
+  background-color: #FFA9A9;
+  height: 14px;
+  width: 14px;
+  border-radius: 100%;
+}
+
+.genre_tag_name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.genre_tag_name > h3 {
+  color: #FFA9A9;
+  font-weight: 400;
+  font-family: "Inter";
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.book_small_title {
+  font-family: "Inter";
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%; /* Adjust based on your layout */
+}
+
+.book_small_three_dots {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: 18px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book_small_three_dots:hover {
+  border-radius: 30%;
+  background-color: rgb(225, 229, 230);
+}
+
+.book_small_container:hover {
+
+  box-shadow: -10px -10px 2px #e6ecee;
+  transform: scale(0.9) translateX(10px) translateY(10px);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
 }

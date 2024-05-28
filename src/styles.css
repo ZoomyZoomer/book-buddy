@@ -852,3 +852,59 @@ input:focus {
   position: absolute;
   top: -6px;
 }
+
+.addBookContainer {
+
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 26px;
+  padding-right: 26px;
+  background-color: white;
+  max-width: fit-content;
+  margin-left: 26px;
+  margin-top: 26px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+}
+
+.addBookText {
+
+  font-family: "Inter";
+  color: #D9D9D9;
+  font-size: 26px;
+  font-weight: 500;
+  margin-left: 16px;
+
+}
+
+.book_small_container {
+
+  width: 360px;
+  background-color: white;
+  margin-left: 26px;
+  border-radius: 15px;
+
+
+}
+
+.image_small {
+
+  transform: scale(0.7);
+
+}
+
+.book_small_grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-left: 30px;
+}
+
+.book_small_image_container {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}

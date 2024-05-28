@@ -6,43 +6,67 @@ import DoughnutChart from '../components/DoughnutChart';
 import SearchBar from '../components/SearchBar';
 import BookshelfSearch from '../components/BookshelfSearch';
 import {ReactComponent as Sort } from '../sort.svg';
+import {ReactComponent as AddBook } from '../addBook.svg'
 import FolderTab from '../components/FolderTab';
+import { useNavigate } from 'react-router-dom';
+import Book_small from '../components/Book_small';
 
 
 function BookshelfPage() {
 
-    const [bookName, setBookName] = useState('');
-    const [bookData, setBookData] = useState(null);
+    const temp = "Favorites"
+    const temp2 = "Recommended"
+    const temp3 = "Collection"
+    const temp4 = "Others"
+
     const [searchQuery, setSearchQuery] = useState('');
     const [activeId, setActiveId] = useState(0);
     const [searchValue, setSearchValue] = useState('');
+    const [bookshelfData, setBookshelfData] = useState({});
+    const [tabName, setTabName] = useState("Favorites");
+    const [bookDetailsArray, setBookDetailsArray] = useState([]);
 
-  
+    const navigate = useNavigate();
 
-    const handleInputChange = (event) => {
-        setBookName(event.target.value);
-    };
 
-    async function submit(e){
+    const loadBooks = async () => {
 
-        e.preventDefault();
+      axios.get('http://localhost:4000/getBooks')
+        .then(response => {
 
-        if (bookName) {
-            const fetchBookData = async () => {
-              try {
-                const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${bookName}`, {
-                    withCredentials: false,
-                });
-                setBookData(response.data);
-              } catch (error) {
-                console.error('Error fetching book data:', error);
-              }
-            };
-      
-            fetchBookData();
-          }
+       const isbnArray = response.data;
+
+    // Map over the ISBN array to create an array of promises
+    const bookDetailsPromises = isbnArray.map(async isbn => {
+      try {
+        const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn.isbn}`, {
+          withCredentials: false,
+        });
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching details for ISBN ${isbn}:`, error.message);
+        return null;
+      }
+    });
+
+    // Resolve all promises and store the results in a separate array
+    return Promise.all(bookDetailsPromises);
+  })
+  .then(details => {
+    // Do something with the book details array
+    console.log(details);
+    setBookDetailsArray(details);
+  })
+  .catch(error => {
+    console.error('Error fetching book details:', error.message);
+  });
+        
 
     }
+
+
+    
+    
 
     const handleSearch = () => {
 
@@ -51,10 +75,7 @@ function BookshelfPage() {
     }
 
 
-    const temp = "Favorites"
-    const temp2 = "Recommended"
-    const temp3 = "Collection"
-    const temp4 = "Others"
+    
 
     const handleTabSwitch = (id) => {
 
@@ -66,6 +87,8 @@ function BookshelfPage() {
 
   return (
     <div className="bookshelfContainer">
+      <button onClick={() => loadBooks()}>CLICK</button>
+      
         
         <div className="bookshelfGrid">
 
@@ -105,7 +128,32 @@ function BookshelfPage() {
             </div>
 
             <div className="flexRight">
-              <div className="libraryContainer" /> 
+              <div className="libraryContainer"> 
+
+                <div className="addBookContainer" onClick={() => navigate('/add')}>
+
+                  <div className="flexMiddle">
+                    <AddBook tabName={tabName}/>
+                  </div>
+                  <div className="addBookText">
+                    Add Book
+                  </div>
+
+                </div>
+
+                <div>
+                  {bookDetailsArray.map((book, index) => (
+                    <Book_small
+                      key={index}
+                      title={book.items[0].volumeInfo.title}
+                      coverImage={book.items[0].volumeInfo.imageLinks?.smallThumbnail}
+                      author = {book.items[0].volumeInfo.authors}
+                    />
+                  ))}
+                </div>
+
+
+              </div> 
             </div>
 
         </div>

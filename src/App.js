@@ -8,6 +8,7 @@ import { UserContextProvider } from './components/UserContext'
 import axios from 'axios'
 import ErrorPage from './pages/ErrorPage'
 import BookshelfPage from './pages/BookshelfPage'
+import AddBook from './pages/AddBook'
 
 axios.defaults.withCredentials = true;
 
@@ -20,6 +21,7 @@ function App() {
       <Route path="/signin" element={<LoginPage />} />
       <Route path="/register" element={<SignUpPage />} />
       <Route path="/bookshelf" element={<BookshelfPage />} />
+      <Route path="/add" element={<AddBook />} />
       <Route path="/error" element={<ErrorPage />} />
     </Routes>
 

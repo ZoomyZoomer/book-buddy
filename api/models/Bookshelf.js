@@ -1,11 +1,36 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const {Schema, model} = mongoose;
 
-const BookSchema = new Schema({
-  identifier: { type: String, required: true, unique: true },
-  data: { type: [String], default: [] } // Array of strings to store ISBN numbers
+const bookEntrySchema = new Schema({
+  volume_id: {
+      type: String,
+      required: true
+  },
+  rating: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 5
+  },
+  pages_read: {
+      type: Number,
+      min: 0
+  },
+  total_pages: {
+      type: Number,
+      min: 0
+  }
 });
 
-const BookshelfModel = mongoose.model('Bookshelf', BookSchema);
+// Define the Bookshelf schema
+const bookshelfSchema = new mongoose.Schema({
+  tab_name: {
+      type: String,
+      required: true
+  },
+  books: [bookEntrySchema] // Embedded document for books
+});
+
+const BookshelfModel = model('Bookshelf', bookshelfSchema);
 
 module.exports = BookshelfModel;

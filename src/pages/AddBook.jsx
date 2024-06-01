@@ -1,93 +1,71 @@
-import React from 'react'
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react'
+import BookItem from '../components/BookItem';
 import axios from 'axios';
-import Bookshelf_Book from '../components/Bookshelf_Book';
+import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
-const AddBook = ({tabName}) => {
+const AddBook = () => {
 
-    const [bookData, setBookData] = useState(null);
-    const [bookName, setBookName] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [desiredBooks, setDesiredBooks] = useState([]);
+    const navigate = useNavigate('/');
+    const { tabName } = useParams();
 
-    async function submit(e){
+    const handleSearch = () => {
+ 
+          axios.get(`https://www.googleapis.com/books/v1/volumes?q=${searchQuery}`, {withCredentials: false})
+            .then(res => {
+              setDesiredBooks(res.data.items);
+              console.log(res.data.items);
+            })
 
-        e.preventDefault();
 
-        if (bookName) {
-            const fetchBookData = async () => {
-              try {
-                const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${bookName}`, {
-                    withCredentials: false,
-                });
-                setBookData(response.data);
-              } catch (error) {
-                console.error('Error fetching book data:', error);
-              }
-            };
-      
-            fetchBookData();
-            
-          }
+
+        setSearchQuery('');
 
     }
 
-    const getISBN = (identifiers) => {
-        
-        if (!identifiers) return 'Unknown ISBN';
+    const handleAddBook = (volumeId, pages) => {
 
-        const isbn13 = identifiers.find(id => id.type === 'ISBN_13');
-        if (isbn13){
-            console.log(isbn13.identifier);
-            return isbn13.identifier;
-        } 
+      axios.post('http://localhost:4000/addBook', {
+        volumeId: volumeId,
+        pages: pages,
+        tabName: tabName
+      }).then( res => {
+        navigate('/bookshelf');
+      })
+      .catch(e => {
+        console.error('Error:', e);
+      });
 
-        const isbn10 = identifiers.find(id => id.type === 'ISBN_10');
-        if (isbn10){
-            console.log(isbn10.identifier);
-            return isbn10.identifier;
-        } 
-
-        return 'Unknown ISBN';
-    };
+    }
 
   return (
-    <>
-        <div className="flexMiddle">
-            <input
-                type="text"
-                value={bookName}
-                onChange={(e) => setBookName(e.target.value)}
-                placeholder="Enter book name"
+    <div>
+        <input 
+            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery}
+        />
+        <button onClick={() => handleSearch()}>Submit</button>
+        
+        {desiredBooks.map((book, index) => (
+          <div>
+            <BookItem 
+              key={index} 
+              title={book.volumeInfo.title} 
+              author={book.volumeInfo?.authors} 
+              volumeId={book.id}
+              cover={book.volumeInfo.imageLinks?.smallThumbnail}
+              genre={book.volumeInfo?.categories}
             />
-            <button className={"submitButton"} type="submit" onClick={submit}>
-              Submit
+            <button onClick={() => handleAddBook(book.id, book.volumeInfo.pageCount)}>
+              Add Book
             </button>
-        </div>
-        <div className="flexMiddle">
-            
-            <div className="bookshelfContainer">
-            {bookData && (
-                <div>
-                <h2>Book Results</h2>
-                <div>
-            {bookData.items.map((book) => (
-              <Bookshelf_Book
-                key={book.id}
-                title={book.volumeInfo.title}
-                author={book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown Author'}
-                publishDate={book.volumeInfo.publishedDate ? book.volumeInfo.publishedDate : 'Unknown Date'}
-                thumbnail={book.volumeInfo.imageLinks?.thumbnail}
-                genres={book.volumeInfo.categories || []}
-                isbn={getISBN(book.volumeInfo.industryIdentifiers)}
-                tabName={tabName}
-              />
-            ))}
           </div>
-                </div>
-            )}
-                
-            </div>
-        </div>
-    </>
+          
+        ))}
+      
+    </div>
   )
 }
 

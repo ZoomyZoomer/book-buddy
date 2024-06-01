@@ -135,59 +135,63 @@ app.post('/logout', (req, res) => {
     
   })
 
-app.post('/addISBN', async (req, res) => {
+app.post('/addBook', async (req, res) => {
+    
+    const {volumeId, pages, tabName} = req.body;
 
-    const { tabName, isbn } = req.body;
+    try{
 
-  try {
-    // Use 'identifier' field in the query
-    let book = await Bookshelf.findOne({ identifier: tabName });
+        const shelf = await Bookshelf.findOne({tab_name: tabName});
 
-    if (book) {
-      // Add the ISBN number to the data array if it doesn't already exist
-      if (!book.data.includes(isbn)) {
-        book.data.push(isbn);
-        await book.save();
-        res.status(200).json({ message: 'ISBN added successfully', book });
-      } else {
-        res.status(400).json({ message: 'ISBN already exists' });
-      }
-    } else {
-      // If the book with the given identifier doesn't exist, create a new document
-      const newBook = new Bookshelf({ identifier: tabName, data: [isbn] });
-      await newBook.save();
-      res.status(201).json({ message: 'Book created and ISBN added successfully', book: newBook });
+        // Shelf doesn't exist (First book is being added)
+        if (!shelf){
+
+            await Bookshelf.create({
+                tab_name: tabName,
+                books: [{volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages}]
+            })
+
+            res.status(201).json({message: "Bookshelf created and successfully book added"});
+
+        } else { // Shelf already exists, append onto the existing array of books
+
+            shelf.books.push({volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages});
+            await shelf.save();
+            res.status(201).json({message: "Book successfully added"});
+
+        }
+
+    } catch (e) {
+        res.status(500).json({error: e});
+    } 
+
+})
+
+app.get('/getCollection', async (req, res) => {
+
+    const tabName = req.query.tabName;
+
+
+    try {
+
+        let shelf = await Bookshelf.findOne({tab_name: tabName});
+
+        // Handle if shelf doesn't exist
+        if (!shelf){
+            shelf = [];
+            res.status(200).json(shelf);
+        } else {
+            res.status(200).json(shelf.books);
+        }
+
+    } catch (e){
+        res.status(500).json({error: e});
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
 
- 
-  
 })
 
 
-
-
-app.get('/getBooks', async (req,res) => {
-
-    try {
-        const bookshelves = await Bookshelf.find({ identifier: "Favorites" });
-        
-        const books = bookshelves.reduce((acc, bookshelf) => {
-          return acc.concat(bookshelf.data.map(isbn => ({ isbn })));
-        }, []);
-
-    
-        res.json(books);
-
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-
-
-
-});
+  
 
 app.listen(4000, () => {
     console.log("port connected");

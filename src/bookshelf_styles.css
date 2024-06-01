@@ -1,0 +1,235 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#root {
+    height: 100%;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    display: none;
+}
+
+.bookshelf_container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.bookshelf_navBar {
+    width: 100%;
+    height: 66px;
+    background-color: #06AB78;
+    border-top-left-radius: 2%;
+    border-bottom-left-radius: 2%;
+    display: flex;
+    justify-self: center;
+    align-items: center;
+    position: relative;
+}
+
+.stats_navBar {
+    width: 100%;
+    height: 62px;
+    background-color: #88D4AB;
+    box-shadow: inset -10px 0 10px -10px #11723e;
+}
+
+.book_section {
+    width: 75%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.stats_section {
+    display: flex;
+    justify-content: left;
+    width: 25%;
+    height: 100%;
+    padding-top: 2px;
+    box-sizing: border-box;
+}
+
+.search_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+}
+
+.searchbar {
+    height: 36px;
+    width: 260px;
+    border-radius: 5px;
+    border-width: 0px;
+    font-family: "Inter";
+    padding-left: 30px;
+    color: #059974;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.searchbar:hover {
+    outline: 2px solid #88D4AB;
+    transition: oultine-color 0.5s ease;
+}
+
+.searchbar:focus {
+    outline: 4px solid #88D4AB;
+    transition: outline-color 0.5s ease;
+}
+
+.search_icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    left: 10px;
+}
+
+.sort_container {
+    position: absolute;
+    right: 20px;
+    color: white;
+    font-family: "Inter";
+    display: flex;
+    align-items: center;
+}
+
+.sort_button {
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    margin-left: 6px;
+}
+
+.sort_button:hover {
+    background-color: #059974;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.questionMark_button {
+    display: flex;
+    align-items: center;
+    margin-left: 6px;
+    cursor: pointer;
+}
+
+.books_container{
+   height: 200px;
+   background-color: #F8F9FD;
+   display: grid;
+   grid-template-columns: 1fr 1fr 1fr;
+   grid-template-rows: 230px 30px 230px;
+}
+
+.folder-tab {
+    display: flex;
+    align-items: center;
+    margin-right: -36px;
+    position: relative;
+    transition: transform 0.5s ease-in-out;
+}
+
+.folder-tab:hover {
+    transform: translateY(-10px) translateX(6px);
+    transition: transform 0.5s ease-in-out;
+}
+
+.tab_section {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: right;
+    position: absolute;
+    top: -40px;
+    margin-right: -10px;
+    right: 52px;
+}
+
+.tabLabel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -6px;
+}
+
+.bookitem_container, .add_book {
+    background-color: rgb(254, 254, 254);
+    width: 300px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin: 20px 30px 20px 30px;
+    padding: 14px 40px 14px 20px;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+
+}
+
+.add_book_text {
+    font-family: "Inter";
+    color: #D9D9D9;
+    font-size: 30px;
+    margin-left: 16px;
+}
+
+.book_contents {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    margin-left: 40px;
+}
+
+.book_title {
+    font-family: "Inter";
+    font-size: 16px;
+    font-weight: 500;
+    overflow: hidden;
+    max-width: 240px;
+}
+
+.book_author {
+    font-family: "Inter";
+    font-size: 14px;
+    font-weight: 400;
+    color: gray;
+    margin-top: 4px;
+}
+
+.book_cover {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+}
+
+.book_cover > img {
+    height: 130px;
+    width: 90px;
+}
+
+.book_rating {
+    margin-top: 16px;
+}
+
+.book_options{
+    position: absolute;
+    display: flex;
+    top: 14px;
+    right: 14px;
+    padding: 6px 4px 6px 4px;
+}
+
+.book_options:hover{
+    background-color: rgb(238, 238, 238);
+    border-radius: 5px;
+}

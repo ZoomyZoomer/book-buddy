@@ -1,16 +1,16 @@
 import React from 'react'
-import Navbar from './components/Navbar'
 import {Route, Routes} from "react-router-dom"
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import SignUpPage from './pages/SignUpPage'
-import { UserContextProvider } from './components/UserContext'
 import axios from 'axios'
 import ErrorPage from './pages/ErrorPage'
 import BookshelfPage from './pages/BookshelfPage'
+import TestPage from './pages/TestPage'
 import AddBook from './pages/AddBook'
 
 axios.defaults.withCredentials = true;
+
 
 function App() {
   return (
@@ -21,7 +21,8 @@ function App() {
       <Route path="/signin" element={<LoginPage />} />
       <Route path="/register" element={<SignUpPage />} />
       <Route path="/bookshelf" element={<BookshelfPage />} />
-      <Route path="/add" element={<AddBook />} />
+      <Route path="/add-book/:tabName" element={<AddBook />} />
+      <Route path="/test" element={<TestPage />} />
       <Route path="/error" element={<ErrorPage />} />
     </Routes>
 

@@ -7,6 +7,7 @@ import {ReactComponent as QuestionMark} from '../questionMark.svg'
 import {ReactComponent as AddBook} from '../addBook.svg'
 import FolderTab from '../components/FolderTab';
 import BookItem from '../components/BookItem';
+import Spinner from '../components/Spinner';
 import axios from 'axios';
 
 
@@ -15,65 +16,101 @@ function BookshelfPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [userCollection, setUserCollection] = useState([]);
+  const [userInfo, setUserInfo] = useState({});
+  const [isProfileFetched, setIsProfileFetched] = useState(false);
+  const [tab, setTab] = useState("Favorites");
+
+  
+  
+  let mutex = 0;
   
   const navigate = useNavigate('/');
 
   const temp = "Favorites";
-  let mutex = 0;
 
   useEffect(() => {
-
+    const fetchProfile = async () => {
       try {
-        axios.get('http://localhost:4000/getCollection', {
-          params: {
-            tabName: temp,
-          },
-        })
-          .then(res => {
-            if (mutex == 0){
-              mutex = 1;
-
-              const bookPromises = res.data.map((book) =>
-                axios.get(`https://www.googleapis.com/books/v1/volumes/${book.volume_id}`, { withCredentials: false })
-              );
-      
-              Promise.all(bookPromises)
-                .then(response => {
-                  const newBooks = response.map(responseAgain => responseAgain.data);
-                  setUserCollection((prevCollection) => [...prevCollection, ...newBooks]);
-                })
-            }
-          })
-
-        
-      } catch (e) {
-        console.error({ error: e });
+        const response = await axios.get('http://localhost:4000/profile', {
+          withCredentials: true,
+        });
+        setUserInfo(response.data.user);
+        setIsProfileFetched(true); // Set the state to true after fetching the profile
+      } catch (error) {
+        // Check if error response status is 401
+        if (error.response && error.response.status === 401) {
+          // Navigate to the sign-in page
+          navigate('/signin');
+        } else {
+          // Handle other errors
+          console.error('Error fetching profile:', error);
+        }
       }
-    
+    };
 
-  
-  }, []); 
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    if (isProfileFetched && userInfo) { // Ensure userInfo is not null
+      const fetchCollection = async () => {
+        try {
+          const response = await axios.get('http://localhost:4000/getCollection', {
+            params: {
+              tabName: tab,
+              username: userInfo.username,
+            },
+          });
+
+          if (mutex == 0) {
+            mutex = 1; // Use setMutex to update state safely
+
+            const bookPromises = response.data.map((book) =>
+              axios.get(`https://www.googleapis.com/books/v1/volumes/${book.volume_id}`, { withCredentials: false })
+            );
+
+            const books = await Promise.all(bookPromises);
+            const newBooks = books.map(bookResponse => bookResponse.data);
+            setUserCollection([...newBooks]);
+          }
+        } catch (e) {
+          console.error({ error: e });
+        }
+      };
+
+      fetchCollection();
+    }
+  }, [isProfileFetched, tab]);
 
 
-
+  console.log(userInfo.username);
 
   return (
     
     <div className="bookshelf_container">
-      <button onClick={() => console.log(userCollection)}></button>
-      
+
       <section className="stats_section">
         <div className="stats_navBar">
 
         </div>
       </section>
 
-      <section className="book_section">
+
+        <section className="book_section">
         <div className="tab_section">
-          <FolderTab text={temp} id={0} active={activeTab}/>
-          <FolderTab text={temp} id={1} active={activeTab}/>
-          <FolderTab text={temp} id={2} active={activeTab}/>
-          <FolderTab text={temp} id={3} active={activeTab}/>
+          <div onClick={() => {mutex = 0; setActiveTab(0); setTab('Favorites')}}>
+            <FolderTab text={'Favorites'} tab_id={0} active={activeTab}/>
+          </div>
+          <div onClick={() => {mutex = 0; setActiveTab(1); setTab('Planned')}}>
+            <FolderTab text={'Planned'} tab_id={1} active={activeTab}/>
+          </div>
+          <div onClick={() => {mutex = 0; setActiveTab(2); setTab('Finished')}}>
+            <FolderTab text={'Finished'} tab_id={2} active={activeTab}/>
+          </div>
+          <div onClick={() => {mutex = 0; setActiveTab(3); setTab('Others')}}>
+            <FolderTab text={'Others'} tab_id={3} active={activeTab}/>
+          </div>
+  
         </div>
         <div className="bookshelf_navBar">
 
@@ -106,18 +143,20 @@ function BookshelfPage() {
 
         <div className="books_container">
             
-        {userCollection.map((book, index) => (
+        {userCollection.length != 0 && userCollection.map((book, index) => (
           <BookItem 
           title={book.volumeInfo.title}
           author={book.volumeInfo.authors}
           cover={book.volumeInfo.imageLinks?.smallThumbnail}
           volumeId={book.id}
           genre={book.volumeInfo?.categories[0]}
+          index={index}
           key={index}
+          tabName={tab}
           />
         ))}
-    
-            <div className="add_book" onClick={() => navigate(`/add-book/${temp}`)}>
+
+            <div className="add_book" onClick={() => navigate(`/add-book/${tab}`)}>
               <div className="flexMiddle">
                 <AddBook />
               </div>
@@ -127,7 +166,9 @@ function BookshelfPage() {
             </div>
         </div>
 
-      </section>
+        </section>
+
+      
 
     </div>
   )

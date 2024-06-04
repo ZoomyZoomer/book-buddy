@@ -32,6 +32,7 @@ function Navbar() {
 
   async function logout() {
 
+
     try {
 
       await axios.post('http://localhost:4000/logout');
@@ -44,6 +45,7 @@ function Navbar() {
     }
 
   }
+  console.log(userInfo.username);
 
   return (
     <>
@@ -95,6 +97,7 @@ function Navbar() {
             TIMER
           </div>
         </div>
+
 
       </div>
 

@@ -22,13 +22,22 @@ const bookEntrySchema = new Schema({
   }
 });
 
+const tabSchema = new Schema({
+
+    tab_name: {
+        type: String
+    },
+    books: [bookEntrySchema] // Embedded document for books
+
+});
+
 // Define the Bookshelf schema
 const bookshelfSchema = new mongoose.Schema({
-  tab_name: {
-      type: String,
-      required: true
+  username: {
+    type: String,
+    required: true
   },
-  books: [bookEntrySchema] // Embedded document for books
+  tabs: [tabSchema]
 });
 
 const BookshelfModel = model('Bookshelf', bookshelfSchema);

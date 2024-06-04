@@ -169,11 +169,19 @@ input[type="search"]::-webkit-search-cancel-button {
     align-items: center;
     justify-content: left;
     margin: 20px 30px 20px 30px;
-    padding: 14px 40px 14px 20px;
+    padding: 20px 40px 20px 20px;
     border-radius: 10px;
     position: relative;
     cursor: pointer;
+    transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+    z-index: 1;
+    backface-visibility: hidden;
+}
 
+.bookitem_container:hover, .add_book:hover {
+    box-shadow: -10px -10px 2px rgb(228, 236, 223);
+    transform: translateX(10px) translateY(10px);
+    transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
 
 .add_book_text {
@@ -194,8 +202,13 @@ input[type="search"]::-webkit-search-cancel-button {
     font-family: "Inter";
     font-size: 16px;
     font-weight: 500;
-    overflow: hidden;
     max-width: 240px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
 }
 
 .book_author {
@@ -204,21 +217,24 @@ input[type="search"]::-webkit-search-cancel-button {
     font-weight: 400;
     color: gray;
     margin-top: 4px;
+    user-select: none;
 }
 
 .book_cover {
     display: flex;
     align-items: left;
     justify-content: left;
+    user-select: none;
 }
 
 .book_cover > img {
-    height: 130px;
+    height: 150px;
     width: 90px;
 }
 
 .book_rating {
     margin-top: 16px;
+
 }
 
 .book_options{
@@ -226,10 +242,110 @@ input[type="search"]::-webkit-search-cancel-button {
     display: flex;
     top: 14px;
     right: 14px;
-    padding: 6px 4px 6px 4px;
+    padding: 7px 5px 7px 5px;
+    z-index: 1000;
 }
 
-.book_options:hover{
+.book_options:hover {
     background-color: rgb(238, 238, 238);
     border-radius: 5px;
+}
+
+.book_options_open {
+    background-color: rgb(238, 238, 238);
+    border-radius: 5px;   
+}
+
+.book_options_closed {
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.book_options_dropdown_unactive, .book_options_dropdown_active {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    user-select: none;
+    background-color: white;
+    box-shadow: 4px 4px 5px rgb(243, 243, 243);
+    border-radius: 6px;
+    color: #06AB78;
+    display: flex;
+    flex-direction: column;
+    min-width:max-content;
+    z-index: 1000;
+}
+
+.book_options_dropdown_unactive, .book_options_dropdown_active > div {
+    font-size: 14px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-family: "Inter";
+}
+
+.book_options_dropdown_active > div:hover {
+    background-color: rgb(238, 238, 238);
+    z-index: 1000;
+}
+
+.book_options_dropdown_unactive {
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1000;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.book_options_dropdown_active {
+    pointer-events: all;
+    opacity: 1;
+    z-index: 1000;
+}
+
+.option_delete_book {
+    color: rgb(238, 119, 119);
+    padding-bottom: 8px;
+    padding-top: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.option_change_pages {
+    padding-top: 8px;
+    padding-bottom: 5px;
+}
+
+.option_change_rating {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.book_page_count {
+    position: absolute;
+    right: 16px;
+    bottom: 6px;
+    font-family: "Inter";
+    font-size: 12px;
+    color: rgb(209, 209, 209);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.change_pages_input {
+    width: 21px;
+    border-width: 1px;
+    border-color: rgb(209, 209, 209);
+    border-style: solid;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: "Inter";
+    color: rgb(209, 209, 209);
+    margin-right: 2px;
+    margin-left: 4px;
+}
+
+.change_pages_input:focus {
+    outline: 1px solid #88D4AB;
 }

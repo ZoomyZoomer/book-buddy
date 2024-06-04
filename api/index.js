@@ -56,6 +56,11 @@ app.post('/register', async(req, res) => {
             daily3: [{ finished: false, id: "3" }]
         })
 
+        const bookshelfDoc = await Bookshelf.create({
+            username: username,
+            books: []
+        })
+
         res.json(userDoc);
 
     } catch(e) {
@@ -137,26 +142,26 @@ app.post('/logout', (req, res) => {
 
 app.post('/addBook', async (req, res) => {
     
-    const {volumeId, pages, tabName} = req.body;
+    const {volumeId, pages, tabName, username} = req.body;
 
     try{
 
-        const shelf = await Bookshelf.findOne({tab_name: tabName});
+        const shelf = await Bookshelf.findOne({username: username});
+        const tab = shelf.tabs.find(tab => tab.tab_name === tabName);
 
-        // Shelf doesn't exist (First book is being added)
-        if (!shelf){
+        // If the tab doesn't exist, create a new tab
+        if (!tab){
 
-            await Bookshelf.create({
-                tab_name: tabName,
-                books: [{volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages}]
-            })
-
-            res.status(201).json({message: "Bookshelf created and successfully book added"});
-
-        } else { // Shelf already exists, append onto the existing array of books
-
-            shelf.books.push({volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages});
+            shelf.tabs.push({tab_name: tabName, books: [{volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages}]});
             await shelf.save();
+
+            res.status(201).json({message: "Tab created and book successfully added"});
+
+        } else { // If the tab already exists, append to the book array
+
+            tab.books.push({volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages});
+            await shelf.save();
+
             res.status(201).json({message: "Book successfully added"});
 
         }
@@ -169,19 +174,19 @@ app.post('/addBook', async (req, res) => {
 
 app.get('/getCollection', async (req, res) => {
 
-    const tabName = req.query.tabName;
+    const { tabName, username } = req.query;
 
 
     try {
 
-        let shelf = await Bookshelf.findOne({tab_name: tabName});
+        const shelf = await Bookshelf.findOne({username: username});
+        const tab = shelf.tabs.find(tab => tab.tab_name === tabName);
 
-        // Handle if shelf doesn't exist
-        if (!shelf){
-            shelf = [];
-            res.status(200).json(shelf);
+        // Handle if tab doesn't exist
+        if (!tab){
+            res.status(200).json([]);
         } else {
-            res.status(200).json(shelf.books);
+            res.status(200).json(tab.books);
         }
 
     } catch (e){
@@ -190,6 +195,168 @@ app.get('/getCollection', async (req, res) => {
 
 })
 
+app.post('/deleteBook', async (req, res) => {
+
+    const {volume_id, tab_name, username} = req.body;
+
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+
+        if (!tab){
+            res.status(500).json({message: "Tab not found"});
+        }
+
+        const result = await BookshelfModel.findOneAndUpdate(
+            {
+              username: username,
+              'tabs.tab_name': tab_name
+            },
+            {
+              $pull: {
+                'tabs.$.books': { volume_id: volume_id }
+              }
+            },
+            {
+              new: true // Return the updated document
+            }
+          );
+
+        if (result){
+            res.status(201).json({message: "Book successfully deleted"});
+        } else {
+            res.status(500).json({message: "Error deleting book"});
+        }
+
+    } catch (e) {
+        res.status(500).json({error: e});
+    }
+
+    
+
+})
+
+app.post('/updateRating', async (req, res) => {
+
+    const {tab_name, rating, volume_id, username} = req.body;
+    
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+
+        if (!tab) {
+            res.status(500).json({message: "Requested tab not found"});
+        }
+
+        // Find the book within the books array
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        if (!book) {
+            res.status(500).json({message: "Requested book not found"});
+        }
+
+        // Update the rating of the found book
+        book.rating = rating;
+
+        // Save the updated bookshelf document
+        await shelf.save();
+
+        res.status(201).json({message: "Rating successfully updated"});
+
+    } catch (e) {
+        res.status(500).json({error: e});
+    }
+})
+
+app.get('/getRating', async (req, res) => {
+
+    const {tab_name, volume_id, username} = req.query;
+
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+
+        if (!tab) {
+            res.status(500).json({message: "Requested tab not found"});
+        }
+
+        // Find the book within the books array
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        if (!book) {
+            res.status(500).json({message: "Requested book not found"});
+        }
+
+        const rating_res = book.rating;
+
+        res.status(200).json(rating_res);
+
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
+
+app.get('/getPages', async (req, res) => {
+
+    const {volume_id, tab_name, username} = req.query;
+
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+
+        if (!tab) {
+            res.status(500).json({message: "Requested tab not found"});
+        }
+
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        if (!book) {
+            res.status(500).json({message: "Requested book not found"});
+        }
+
+        res.status(200).json([book.pages_read, book.total_pages]);
+
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
+
+app.post('/setPages', async (req, res) => {
+
+    const {volume_id, tab_name, pages_read, username} = req.body;
+
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+
+        if (!tab) {
+            res.status(500).json({message: "Requested tab not found"});
+        }
+
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        if (!book) {
+            res.status(500).json({message: "Requested book not found"});
+        }
+
+        book.pages_read = pages_read;
+
+        await shelf.save();
+
+        res.status(201).json({message: "Page count successfully updated"});
+
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
 
   
 

@@ -583,7 +583,7 @@ green {
 .triangleActive {
   width: 0;
   height: 0;
-  border-bottom: 80px solid #06AB78;
+  border-bottom: 70px solid #06AB78;
   border-left: 80px solid transparent;
   cursor: pointer;
   z-index: 10;
@@ -592,7 +592,7 @@ green {
 .triangleUnactive {
   width: 0;
   height: 0;
-  border-bottom: 80px solid #F0F0F0;
+  border-bottom: 70px solid #F0F0F0;
   border-left: 80px solid transparent;
   cursor: pointer;
 }
@@ -602,8 +602,8 @@ green {
   background-color: #06AB78;
   color: white;
   padding: 10px 20px;
-  height: 60px;
-  width: 80px;
+  height: 50px;
+  width: 140px;
   line-height: 60px;
   font-family: "Inter";
   font-weight: 500;
@@ -619,8 +619,8 @@ green {
   background-color: #F0F0F0;
   color: #717171;
   padding: 10px 20px;
-  height: 60px;
-  width: 80px;
+  height: 50px;
+  width: 140px;
   line-height: 60px;
   font-family: "Inter";
   border-top-right-radius: 10px;

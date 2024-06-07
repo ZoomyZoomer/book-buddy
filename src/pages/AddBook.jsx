@@ -35,7 +35,6 @@ const AddBook = () => {
       fetchProfile();
     }, []);
 
-    console.log(userInfo.username);
 
     const handleSearch = () => {
  
@@ -51,10 +50,14 @@ const AddBook = () => {
 
     }
 
-    const handleAddBook = (volumeId, pages) => {
+    const handleAddBook = (volumeId, pages, title, author, cover, genre) => {
 
       axios.post('http://localhost:4000/addBook', {
         volumeId: volumeId,
+        title: title,
+        author: author,
+        cover: cover,
+        genre: genre,
         pages: pages,
         tabName: tabName,
         username: userInfo.username
@@ -83,7 +86,7 @@ const AddBook = () => {
               cover={book.volumeInfo.imageLinks?.smallThumbnail}
               genre={book.volumeInfo?.categories}
             />
-            <button onClick={() => handleAddBook(book.id, book.volumeInfo.pageCount)}>
+            <button onClick={() => handleAddBook(book.id, book.volumeInfo.pageCount, book.volumeInfo.title, book.volumeInfo?.authors[0], book.volumeInfo.imageLinks?.smallThumbnail, book.volumeInfo?.categories)}>
               Add Book
             </button>
           </div>

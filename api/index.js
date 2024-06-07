@@ -15,9 +15,6 @@ app.use(express.json());
 app.use(cors({credentials:true, origin:'http://localhost:3000'}));
 app.use(cookieParser());
 
-
-
-
 mongoose.set('strictQuery', false);
 mongoose.connect("mongodb+srv://kcw90:oJQDQrLG9h466RKf@cluster0.ajxucqi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 .then(() => {
@@ -38,6 +35,7 @@ app.get('/', (req, res) => {
 app.post('/register', async(req, res) => {
 
     const {username, password, email} = req.body;
+    colors_collection = ["#FFA9A9", "#A9D1FF", "#A8FFBB", "#F3A9FF", "#FFE7A9", "#A9FFE0"];
 
     try {
 
@@ -58,7 +56,10 @@ app.post('/register', async(req, res) => {
 
         const bookshelfDoc = await Bookshelf.create({
             username: username,
-            books: []
+            books: [],
+            genre_colors: [],
+            color_collection: colors_collection,
+            default_color: 'red'
         })
 
         res.json(userDoc);
@@ -142,24 +143,43 @@ app.post('/logout', (req, res) => {
 
 app.post('/addBook', async (req, res) => {
     
-    const {volumeId, pages, tabName, username} = req.body;
+    const {volumeId, title, author, cover, genre, pages, tabName, username} = req.body;
 
     try{
 
         const shelf = await Bookshelf.findOne({username: username});
         const tab = shelf.tabs.find(tab => tab.tab_name === tabName);
 
+        const genreExists = shelf.genre_colors.some(gc => gc.genre === genre[0]);
+
+        // Check if the genre exists already
+
+        if (!genreExists){
+            const firstColor = shelf.color_collection.shift();
+
+            if (firstColor === undefined){
+                shelf.genre_colors.push({genre: genre[0], color: shelf.default_color});
+            } else{
+                shelf.genre_colors.push({genre: genre[0], color: firstColor});
+            }
+
+            
+
+            
+        } 
+
         // If the tab doesn't exist, create a new tab
         if (!tab){
 
-            shelf.tabs.push({tab_name: tabName, books: [{volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages}]});
+
+            shelf.tabs.push({tab_name: tabName, books: [{volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages}]});
             await shelf.save();
 
             res.status(201).json({message: "Tab created and book successfully added"});
 
         } else { // If the tab already exists, append to the book array
 
-            tab.books.push({volume_id: volumeId, rating: 0, pages_read: 0, total_pages: pages});
+            tab.books.push({volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages});
             await shelf.save();
 
             res.status(201).json({message: "Book successfully added"});
@@ -200,38 +220,15 @@ app.post('/deleteBook', async (req, res) => {
     const {volume_id, tab_name, username} = req.body;
 
     try {
-
-        const shelf = await Bookshelf.findOne({ username: username });
-        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
-
-        if (!tab){
-            res.status(500).json({message: "Tab not found"});
-        }
-
-        const result = await BookshelfModel.findOneAndUpdate(
-            {
-              username: username,
-              'tabs.tab_name': tab_name
-            },
-            {
-              $pull: {
-                'tabs.$.books': { volume_id: volume_id }
-              }
-            },
-            {
-              new: true // Return the updated document
-            }
-          );
-
-        if (result){
-            res.status(201).json({message: "Book successfully deleted"});
-        } else {
-            res.status(500).json({message: "Error deleting book"});
-        }
-
-    } catch (e) {
-        res.status(500).json({error: e});
-    }
+        await Bookshelf.updateOne(
+          { username: username, 'tabs.tab_name': tab_name },
+          { $pull: { 'tabs.$.books': { volume_id: volume_id } } }
+        );
+        
+        res.status(204).json({message: "Book successfully deleted"});
+      } catch (err) {
+        res.status(500).json({message: "Could not delete book"});
+      }
 
     
 
@@ -357,6 +354,44 @@ app.post('/setPages', async (req, res) => {
     }
 
 })
+
+app.get('/getBooksBySearch', async(req, res) => {
+
+    const {search_query, tab_name, username} = req.query;
+
+    try {
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+
+        if (!tab){
+            // Create a new tab if it doesn't exist
+            shelf.tabs.push({tab_name: tab_name, books: []});
+            await shelf.save();
+        }
+        const matchingBooks = tab.books.filter(book => book.title.toLowerCase().includes(search_query.toLowerCase()));
+        res.status(200).json(matchingBooks);
+
+      } catch (e) {
+        res.status(500).json({error: e});
+      }
+
+})
+
+app.get('/getGenreColor', async(req, res) => {
+
+    const {username, genre} = req.query;
+
+    try {
+
+
+        res.status(200).json(genre);
+    
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
+
 
   
 

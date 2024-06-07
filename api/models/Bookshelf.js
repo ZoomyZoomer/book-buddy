@@ -6,6 +6,19 @@ const bookEntrySchema = new Schema({
       type: String,
       required: true
   },
+  title: {
+    type: String,
+    required: true
+  },
+  cover: {
+    type: String
+  },
+  author: {
+    type: String
+  },
+  genre: {
+    type: String
+  },
   rating: {
       type: Number,
       required: true,
@@ -23,21 +36,34 @@ const bookEntrySchema = new Schema({
 });
 
 const tabSchema = new Schema({
-
     tab_name: {
         type: String
     },
     books: [bookEntrySchema] // Embedded document for books
-
 });
 
-// Define the Bookshelf schema
+const genreColorSchema = new Schema({
+    genre: {
+      type: String,
+      required: true
+    },
+    color: {
+      type: String
+    }
+})
+
 const bookshelfSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true
   },
-  tabs: [tabSchema]
+  tabs: [tabSchema],
+  genre_colors: [genreColorSchema],
+  color_collection: [],
+  default_color: {
+    type: String,
+    required: true
+  }
 });
 
 const BookshelfModel = model('Bookshelf', bookshelfSchema);

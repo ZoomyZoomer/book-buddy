@@ -1,22 +1,29 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import RatingStatic from './RatingStatic'
 import RatingFluid from './RatingFluid'
 import {ReactComponent as ThreeDots} from '../threeDots.svg'
 import {ReactComponent as Checkmark} from '../checkmarkPages.svg'
+import {ReactComponent as DotsGrid} from '../dotsGrid.svg'
 
-const BookItem = ({title, author, cover, volumeId, genre, index, tabName}) => {
+const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profileFetched, username, setActiveDropdown, activeDropdown}) => {
 
-  const [activeDropdown, setActiveDropdown] = useState(false);
   const [isMounted, setIsMounted] = useState(true);
   const [fluidRating, setFluidRating] = useState(false);
   const [pagesRead, setPagesRead] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isEditingPages, setIsEditingPages] = useState(false);
-  const [changingPage, setChangingPage] = useState(0);
   const [isProfileFetched, setIsProfileFetched] = useState(false);
   const [userInfo, setUserInfo] = useState({});
+  const [updatePages, setUpdatePages] = useState(0);
+  const [isUpdated, setIsUpdated] = useState(false);
+  const effectRan = useRef(false);
+  const ratingEffectRan = useRef(false);
+  const [rating, setRating] = useState(0);
+  const [change, setChange] = useState(false);
+  const rerender = useRef(false);
+
 
   const navigate = useNavigate('/');
 
@@ -38,90 +45,153 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName}) => {
     
   }
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get('http://localhost:4000/profile', {
-          withCredentials: true,
-        });
-        setUserInfo(response.data.user);
-        setIsProfileFetched(true);
-      } catch (error) {
-        // Check if error response status is 401
-        if (error.response && error.response.status === 401) {
-          // Navigate to the sign-in page
-          navigate('/signin');
-        } else {
-          // Handle other errors
-          console.error('Error fetching profile:', error);
-        }
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  const handle_unmount = () => {
-    setIsMounted(false);
-    // Make request to database to delete book entry
+  const handle_unmount = async() => {
     try {
-      axios.post('http://localhost:4000/deleteBook', {
+
+      await axios.post('http://localhost:4000/deleteBook', {
         volume_id: volumeId,
         tab_name: tabName,
-        username: userInfo.username
-      });
+        username: username
+      })
+
+      setIsMounted(false);
+
     } catch (e) {
-      setIsMounted(true);
-      console.error({ error: e });
+      console.error('Error deleting book:', e);
     }
   };
 
-  const handle_change_pages = (value) => {
-    setChangingPage(value);
-  };
 
-  const submit_page_change = async () => {
+  const setPages = async() => {
+
     try {
+
+      setPagesRead(updatePages);
+
       await axios.post('http://localhost:4000/setPages', {
         volume_id: volumeId,
         tab_name: tabName,
-        pages_read: changingPage,
-        username: userInfo.username
-      });
-      setIsEditingPages(false);
-    } catch (e) {
-      console.error({ error: e });
+        pages_read: updatePages,
+        username: username
+      })
+
+      effectRan.current = false;
+      setIsUpdated(true);
+
+    } catch(e) {
+      console.error({error: e});
     }
 
-  };
+  }
 
-  // Get pages read
-  useEffect(() => {
-    if (isProfileFetched) { // Only execute this effect if the profile has been fetched
-      try {
-        axios.get('http://localhost:4000/getPages', {
-          params: {
-            volume_id: volumeId,
-            tab_name: tabName,
-            username: userInfo.username
-          }
-        })
-        .then(res => {
-          setPagesRead(res.data[0]);
-          setTotalPages(res.data[1]);
-        });
-      } catch (e) {
-        console.error({ error: e });
-      }
-    }
-  }, [isProfileFetched, isEditingPages]);
+
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
-      submit_page_change();
+      setIsEditingPages(false);
+      setPages();
+    }
   }
-}
-  
+
+  const getPages = async() => {
+
+    try {
+
+      const response = await axios.get('http://localhost:4000/getPages', {
+        params: {
+          volume_id: volumeId,
+          tab_name: tabName,
+          username: username
+        }
+      });
+
+      setPagesRead(response.data[0]);
+      setTotalPages(response.data[1]);
+      rerender.current = true;
+
+    } catch(e) {
+      console.error({error: e});
+    }
+
+  }
+
+  useEffect(() => {
+
+    if (effectRan.current === false) {
+      if (profileFetched){
+        getPages();
+        effectRan.current = true;
+        setIsUpdated(false);
+      }
+    }
+
+
+  }, [{isUpdated, change}])
+
+
+  useEffect(() => {
+
+    if (ratingEffectRan.current === false) {
+      if (fluidRating === false){
+        if (profileFetched){
+          getRating();
+          ratingEffectRan.current = true;
+        }
+      }
+    }
+
+  }, [{fluidRating, change}])
+
+  const getRating = async() => {
+
+    const res = await axios.get('http://localhost:4000/getRating', {
+      params: {
+        tab_name: tabName,
+        volume_id: volumeId,
+        username: username
+      }
+    })
+
+    setRating(res.data);
+
+  }
+
+  useEffect(() => {
+
+    if (rerender){
+      effectRan.current = false;
+      ratingEffectRan.current = false;
+      setChange(true);
+    }
+
+  }, [tabName])
+
+  const getGenreColor = async() => {
+
+    try {
+
+      const res = await axios.get('http://localhost:4000/getGenreColor', {
+        params: {
+          username: username,
+          genre: genre,
+        }
+      })
+
+
+    } catch(e) {
+      console.error({error: e});
+    }
+
+  }
+
+  useEffect(() => {
+
+    getGenreColor();
+    
+
+  })
+
+
 
   return (
     <>
@@ -140,14 +210,21 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName}) => {
             <div className="book_author">
               {author}
             </div>
-            <div className="book_rating" onClick={() => setFluidRating(false)}>
+            <div className="book_rating" onClick={() => setFluidRating(true)}>
               {!fluidRating && (
-                <RatingStatic tabName={tabName} volumeId={volumeId} ratingChanged={fluidRating}/>
+                <RatingStatic tabName={tabName} volumeId={volumeId} rating={rating}/>
               )}
-              {fluidRating && (
-                <RatingFluid tabName={tabName} volumeId={volumeId}/>
-              )}
+              {fluidRating && (() => {
+                ratingEffectRan.current = false;
+                return <RatingFluid tabName={tabName} volumeId={volumeId} username={username} fluidRating={setFluidRating} rating={setRating}/>;
+              })()}
               
+            </div>
+            <div id={"genre_tag_" + index} className="genre_tag">
+              <div className="genre_circle"/>
+              <div className="genre_text">
+                  Fantasy
+              </div>
             </div>
 
 
@@ -156,7 +233,7 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName}) => {
           <div id={"book_options_" + index} className={"book_options"} onClick={() => handle_dropdown()}>
 
               <ThreeDots />
-
+              
             <div id={"dropdown_" + index} className={"book_options_dropdown_unactive"}>
                 <div className="option_change_pages" onClick={() => setIsEditingPages(true)}>
                   Edit Page Count
@@ -179,7 +256,7 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName}) => {
                 <>
                   <input 
                     className="change_pages_input"
-                    onChange={(e) => handle_change_pages(e.target.value)}
+                    onChange={(e) => setUpdatePages(e.target.value)}
                     onKeyDown={handleKeyPress}
                     defaultValue={pagesRead}
                   />
@@ -188,8 +265,12 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName}) => {
                 )}
                 /
                 <div style={{marginLeft: '2px'}}>
-                {totalPages} pages read
+                {totalPages}
                 </div> 
+
+                <div className="dots_grid">
+                  <DotsGrid />
+                </div>
 
                 
           </div>

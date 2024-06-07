@@ -5,50 +5,31 @@ import { ReactComponent as StarEmpty } from '../starEmpty.svg'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
-const RatingFluid = ({ tabName, volumeId }) => {
+const RatingFluid = ({ tabName, volumeId, username, fluidRating, rating}) => {
 
     const [ratingValue, setRatingValue] = useState(0);
     const [userInfo, setUserInfo] = useState({});
 
     const navigate = useNavigate('/');
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-          try {
-            const response = await axios.get('http://localhost:4000/profile', {
-              withCredentials: true,
-            });
-            setUserInfo(response.data.user);
-          } catch (error) {
-            // Check if error response status is 401
-            if (error.response && error.response.status === 401) {
-              // Navigate to the sign-in page
-              navigate('/signin');
-            } else {
-              // Handle other errors
-              console.error('Error fetching profile:', error);
-            }
-          }
-        };
-    
-        fetchProfile();
-      }, []);
+   
+    const handle_change = async() => {
 
-    const handle_change = () => {
+      rating(ratingValue);
 
-        try {
+      try{
+        await axios.post('http://localhost:4000/updateRating',{
+          tab_name: tabName,
+          volume_id: volumeId,
+          rating: ratingValue,
+          username: username
+        })
 
-            axios.post('http://localhost:4000/updateRating', {
-                tab_name: tabName,
-                rating: ratingValue,
-                volume_id: volumeId,
-                username: userInfo.username
-            })
+        fluidRating(false);
 
-        } catch(e) {
-            console.error({error: e});
-        }
-
+      } catch(e) {
+        console.error({error: e});
+      }
     }
 
 

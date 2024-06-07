@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import '../bookshelf_styles.css';
 import {ReactComponent as Search} from '../search.svg'
@@ -13,13 +13,17 @@ import axios from 'axios';
 
 function BookshelfPage() {
 
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [userCollection, setUserCollection] = useState([]);
   const [userInfo, setUserInfo] = useState({});
   const [isProfileFetched, setIsProfileFetched] = useState(false);
   const [tab, setTab] = useState("Favorites");
-
+  const [dropdownID, setDropdownID] = useState('');
+  const change = useRef(false);
+  const [activeDropdown, setActiveDropdown] = useState(false);
+  const [booksBySearch, setBooksBySearch] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   
   let mutex = 0;
@@ -61,6 +65,10 @@ function BookshelfPage() {
               username: userInfo.username,
             },
           });
+          setBooksBySearch([]);
+          setIsSearching(false);
+          setUserCollection([]);
+          setSearchQuery('');
 
           if (mutex == 0) {
             mutex = 1; // Use setMutex to update state safely
@@ -83,9 +91,73 @@ function BookshelfPage() {
   }, [isProfileFetched, tab]);
 
 
-  console.log(userInfo.username);
+  const handleLeftClick = (e) => {
+
+    if (e.button === 0){
+
+ 
+
+        const openOptions = document.getElementsByClassName('book_options_open');
+        
+
+        if (change.current == true){
+          setTimeout(() => {
+            openOptions[0]?.classList?.remove('book_options_open');
+            const openDropdown = document.getElementsByClassName('book_options_dropdown_active');
+            openDropdown[0]?.classList?.add('book_options_dropdown_unactive');
+            openDropdown[0]?.classList?.remove('book_options_dropdown_active');
+            setActiveDropdown(false);
+            change.current = false;
+          }, 200);
+        }
+
+        if (openOptions.length != 0){
+          change.current = true;
+        }
+
+
+    }
+
+  }
+
+  useEffect(() => {
+
+    document.addEventListener('mousedown', (e) => handleLeftClick(e));
+
+  }, [])
+
+  const get_books_by_search = async(searchValue) => {
+
+    setSearchQuery(searchValue);
+
+    if (searchValue != ''){
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
+
+    try {
+
+      const response = await axios.get('http://localhost:4000/getBooksBySearch', {
+        params: {
+          search_query: searchValue,
+          tab_name: tab,
+          username: userInfo.username
+        }
+        
+      })
+
+      setBooksBySearch(response.data);
+
+    } catch(e) {
+      console.error({error :e});
+    }
+
+  }
+
 
   return (
+
     
     <div className="bookshelf_container">
 
@@ -115,23 +187,32 @@ function BookshelfPage() {
         <div className="bookshelf_navBar">
 
           <div style={{display: 'flex', width: '100%', justifyContent: 'center'}}>
+
+            <button style={{zIndex: '100'}}onClick={() => navigate(`/add-book/${tab}`)}>Add Book</button>
+
             <div className="search_container">
               <input 
                 className="searchbar" 
                 type="search" 
-                onChange={(e) => setSearchQuery(e.target.value)}>
-              </input>
+                onChange={(e) => {get_books_by_search(e.target.value)}}
+                placeholder='Search by title'
+                value={searchQuery}
+              />
               <div className="search_icon">
                 <Search />
-              </div>
-              <div className="questionMark_button">
-                <QuestionMark />
               </div>
             </div>
           </div>
 
           <div className="sort_container">
-            <div>
+            <div style={{cursor: 'pointer'}}>
+              EDIT
+            </div>
+            <div className="questionMark_button">
+                <QuestionMark />
+            </div>
+            <div className="segment"/>
+            <div style={{cursor: 'pointer'}}>
               SORT
             </div>
             <div className="sort_button">
@@ -143,27 +224,45 @@ function BookshelfPage() {
 
         <div className="books_container">
             
-        {userCollection.length != 0 && userCollection.map((book, index) => (
-          <BookItem 
-          title={book.volumeInfo.title}
-          author={book.volumeInfo.authors}
-          cover={book.volumeInfo.imageLinks?.smallThumbnail}
-          volumeId={book.id}
-          genre={book.volumeInfo?.categories[0]}
-          index={index}
-          key={index}
-          tabName={tab}
-          />
+        {isSearching && booksBySearch.length == 0 ? (<></>) : isSearching && booksBySearch.length != 0 ? booksBySearch.map((book, index) => (
+          <>
+            <BookItem 
+            title={book.title}
+            author={book.author}
+            cover={book.cover}
+            volumeId={book.volume_id}
+            genre={book.genre}
+            index={index}
+            key={index}
+            tabName={tab}
+            profileFetched={isProfileFetched}
+            username={userInfo.username}
+            activeDropdown={activeDropdown}
+            setActiveDropdown={setActiveDropdown}
+            />
+
+           
+          </>
+
+          )) : !isSearching && userCollection.length != 0 && userCollection.map((book, index) => (
+          <>
+            <BookItem 
+            title={book.volumeInfo.title}
+            author={book.volumeInfo.authors[0]}
+            cover={book.volumeInfo.imageLinks?.smallThumbnail}
+            volumeId={book.id}
+            genre={book.volumeInfo?.categories}
+            index={index}
+            key={index}
+            tabName={tab}
+            profileFetched={isProfileFetched}
+            username={userInfo.username}
+            activeDropdown={activeDropdown}
+            setActiveDropdown={setActiveDropdown}
+            />
+          </>
         ))}
 
-            <div className="add_book" onClick={() => navigate(`/add-book/${tab}`)}>
-              <div className="flexMiddle">
-                <AddBook />
-              </div>
-              <div className="add_book_text">
-                Add Book
-              </div>
-            </div>
         </div>
 
         </section>

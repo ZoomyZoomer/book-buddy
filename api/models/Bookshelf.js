@@ -1,6 +1,22 @@
 const mongoose = require('mongoose');
 const {Schema, model} = mongoose;
 
+const bannerItemSchema = new Schema({
+  banner_name: {
+    type: String
+  },
+  src: {
+    type: String
+  }
+})
+
+const bannerSchema = new Schema({
+  cover_right: bannerItemSchema,
+  cover_top: bannerItemSchema,
+  pages_top: bannerItemSchema,
+  book_right: bannerItemSchema
+})
+
 const bookEntrySchema = new Schema({
   volume_id: {
       type: String,
@@ -32,7 +48,8 @@ const bookEntrySchema = new Schema({
   total_pages: {
       type: Number,
       min: 0
-  }
+  },
+  banner_items: bannerSchema
 });
 
 const tabSchema = new Schema({

@@ -67,20 +67,10 @@ function BookshelfPage() {
           });
           setBooksBySearch([]);
           setIsSearching(false);
-          setUserCollection([]);
+          setUserCollection(response.data);
+          console.log(response.data);
           setSearchQuery('');
 
-          if (mutex == 0) {
-            mutex = 1; // Use setMutex to update state safely
-
-            const bookPromises = response.data.map((book) =>
-              axios.get(`https://www.googleapis.com/books/v1/volumes/${book.volume_id}`, { withCredentials: false })
-            );
-
-            const books = await Promise.all(bookPromises);
-            const newBooks = books.map(bookResponse => bookResponse.data);
-            setUserCollection([...newBooks]);
-          }
         } catch (e) {
           console.error({ error: e });
         }
@@ -98,6 +88,7 @@ function BookshelfPage() {
  
 
         const openOptions = document.getElementsByClassName('book_options_open');
+        const zIndex = document.getElementsByClassName('z-index');
         
 
         if (change.current == true){
@@ -106,6 +97,7 @@ function BookshelfPage() {
             const openDropdown = document.getElementsByClassName('book_options_dropdown_active');
             openDropdown[0]?.classList?.add('book_options_dropdown_unactive');
             openDropdown[0]?.classList?.remove('book_options_dropdown_active');
+            zIndex[0]?.classList.remove("z-index");
             setActiveDropdown(false);
             change.current = false;
           }, 200);
@@ -247,11 +239,11 @@ function BookshelfPage() {
           )) : !isSearching && userCollection.length != 0 && userCollection.map((book, index) => (
           <>
             <BookItem 
-            title={book.volumeInfo.title}
-            author={book.volumeInfo.authors[0]}
-            cover={book.volumeInfo.imageLinks?.smallThumbnail}
-            volumeId={book.id}
-            genre={book.volumeInfo?.categories}
+            title={book.title}
+            author={book.author}
+            cover={book.cover}
+            volumeId={book.volume_id}
+            genre={book.genre}
             index={index}
             key={index}
             tabName={tab}

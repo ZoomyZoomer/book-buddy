@@ -6,6 +6,7 @@ import RatingFluid from './RatingFluid'
 import {ReactComponent as ThreeDots} from '../threeDots.svg'
 import {ReactComponent as Checkmark} from '../checkmarkPages.svg'
 import {ReactComponent as DotsGrid} from '../dotsGrid.svg'
+import {ReactComponent as PlusPages} from '../plus-circle-svgrepo-com (1).svg'
 
 const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profileFetched, username, setActiveDropdown, activeDropdown}) => {
 
@@ -23,6 +24,11 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
   const [rating, setRating] = useState(0);
   const [change, setChange] = useState(false);
   const rerender = useRef(false);
+  const [moveActive, setMoveActive] = useState(false);
+  const [bannerCoverRight, setBannerCoverRight] = useState(null);
+  const [bannerCoverTop, setBannerCoverTop] = useState(null);
+  const [bannerPageTop, setBannerPageTop] = useState(null);
+  const [bannerBookRight, setBannerBookRight] = useState(null);
 
 
   const navigate = useNavigate('/');
@@ -34,12 +40,14 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
       document.getElementById("dropdown_" + index).classList.remove("book_options_dropdown_active");
       document.getElementById("book_options_" + index).classList.remove("book_options_open");
       document.getElementById("book_options_" + index).classList.add("book_options_closed");
+      document.getElementById("container_" + index).classList.remove("z-index");
       setActiveDropdown(false);
     } else {
       document.getElementById("dropdown_" + index).classList.add("book_options_dropdown_active");
       document.getElementById("dropdown_" + index).classList.remove("book_options_dropdown_unactive");
       document.getElementById("book_options_" + index).classList.add("book_options_open");
       document.getElementById("book_options_" + index).classList.remove("book_options_closed");
+      document.getElementById("container_" + index).classList.add("z-index");
       setActiveDropdown(true);
     }
     
@@ -166,6 +174,23 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
 
   }, [tabName])
 
+  function lightenColor(color, percent) {
+    // Extract the RGB values
+    const num = parseInt(color.slice(1), 16);
+    let r = (num >> 16) + Math.round(255 * percent);
+    let g = ((num >> 8) & 0x00FF) + Math.round(255 * percent);
+    let b = (num & 0x0000FF) + Math.round(255 * percent);
+
+    // Ensure values are within the 0-255 range
+    r = Math.min(255, r);
+    g = Math.min(255, g);
+    b = Math.min(255, b);
+
+    // Convert back to hex
+    const newColor = (r << 16) | (g << 8) | b;
+    return `#${newColor.toString(16).padStart(6, '0')}`;
+}
+
   const getGenreColor = async() => {
 
     try {
@@ -178,16 +203,47 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
       })
 
 
+      const lightColor = lightenColor(res.data.color, 0.25);
+      document.getElementById("genre_tag_" + index).style.backgroundColor = lightColor;
+      document.getElementById("genre_text_"+index).style.color = res.data.color;
+      document.getElementById("genre_circle_"+index).style.backgroundColor = res.data.color;
+
+
     } catch(e) {
       console.error({error: e});
     }
 
   }
 
+  const getBanners = async() => {
+
+    try {
+      
+      const res = await axios.get('http://localhost:4000/getBanners', {
+        params: {
+          username: username,
+          tab_name: tabName,
+          volume_id: volumeId
+        }
+      })
+
+      setBannerCoverRight(res.data?.cover_right?.src);
+      setBannerCoverTop(res.data?.cover_top?.src);
+      setBannerPageTop(res.data?.pages_top?.src);
+      setBannerBookRight(res.data?.book_right?.src);
+
+
+    } catch(e) {
+      console.error({error: e});
+    }
+    
+
+  }
+
   useEffect(() => {
 
     getGenreColor();
-    
+    getBanners();
 
   })
 
@@ -197,11 +253,14 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
     <>
       {isMounted && (
 
-        <div className="bookitem_container">
-
+        <div id={"container_" + index} className="bookitem_container">
         <div className="book_cover">
           <img src={cover} draggable="false" />
+          <div className="book_banner_right">
+            <img className="book_banner_right_img" src={bannerCoverRight}/>
+          </div>
         </div>
+        
           <div className="book_contents">
 
             <div className="book_title">
@@ -221,9 +280,9 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
               
             </div>
             <div id={"genre_tag_" + index} className="genre_tag">
-              <div className="genre_circle"/>
-              <div className="genre_text">
-                  Fantasy
+              <div id={"genre_circle_" + index} className="genre_circle"/>
+              <div id={"genre_text_" + index} className="genre_text">
+                  {genre}
               </div>
             </div>
 
@@ -235,12 +294,12 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
               <ThreeDots />
               
             <div id={"dropdown_" + index} className={"book_options_dropdown_unactive"}>
-                <div className="option_change_pages" onClick={() => setIsEditingPages(true)}>
-                  Edit Page Count
+                <div className="option_customize_book">
+                  Customize
                 </div>
 
-                <div className="option_change_rating" onClick={() => setFluidRating(true)}>
-                  Change Rating
+                <div className="option_move_book" onClick={() => setMoveActive(true)}>
+                  Move / Drag
                 </div>
 
                 <div className="option_delete_book" onClick={() => handle_unmount()}>
@@ -251,7 +310,10 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
 
           <div className="book_page_count">
 
-                {!isEditingPages && (<div style={{marginRight: '2px'}}>{pagesRead}</div>)} 
+                {!isEditingPages && (<div style={{marginRight: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '2px'}} onClick={() => setIsEditingPages(true)}>
+                    <PlusPages />
+                  </div>{pagesRead}</div>)} 
                 {isEditingPages && (
                 <>
                   <input 
@@ -264,15 +326,18 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
                 
                 )}
                 /
-                <div style={{marginLeft: '2px'}}>
+                <div style={{marginLeft: '1px'}}>
                 {totalPages}
                 </div> 
 
-                <div className="dots_grid">
-                  <DotsGrid />
+                {moveActive && (
+                  <div className="dots_grid">
+                    <DotsGrid />
                 </div>
-
-                
+                )}
+              <div className="book_banner_top">
+                <img className="book_banner_top_img" src={bannerPageTop}/>
+              </div>
           </div>
           
         </div>

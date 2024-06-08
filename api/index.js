@@ -2,12 +2,12 @@ const express = require('express');
 const User = require('./models/User');
 const Quest = require('./models/Quests');
 const Bookshelf = require('./models/Bookshelf');
+const Inventory = require('./models/Inventory');
 const cors = require('cors');
 const app = express();
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const QuestsModel = require('./models/Quests');
 const cookieParser = require('cookie-parser');
 
 
@@ -47,19 +47,24 @@ app.post('/register', async(req, res) => {
         });
 
         // Quest data
-        const questDoc = await Quest.create({
+        await Quest.create({
             username,
             daily1: [{ finished: false, id: "1" }],
             daily2: [{ finished: false, id: "2" }],
             daily3: [{ finished: false, id: "3" }]
         })
 
-        const bookshelfDoc = await Bookshelf.create({
+        await Bookshelf.create({
             username: username,
-            books: [],
+            tabs: [],
             genre_colors: [],
             color_collection: colors_collection,
             default_color: 'red'
+        })
+
+        await Inventory.create({
+            username: username,
+            items: []
         })
 
         res.json(userDoc);
@@ -172,14 +177,14 @@ app.post('/addBook', async (req, res) => {
         if (!tab){
 
 
-            shelf.tabs.push({tab_name: tabName, books: [{volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages}]});
+            shelf.tabs.push({tab_name: tabName, books: [{volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages, banner_items: null}]});
             await shelf.save();
 
             res.status(201).json({message: "Tab created and book successfully added"});
 
         } else { // If the tab already exists, append to the book array
 
-            tab.books.push({volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages});
+            tab.books.push({volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages, banner_items: null});
             await shelf.save();
 
             res.status(201).json({message: "Book successfully added"});
@@ -383,9 +388,30 @@ app.get('/getGenreColor', async(req, res) => {
 
     try {
 
+        const shelf = await Bookshelf.findOne({ username: username });
 
-        res.status(200).json(genre);
+        const genreObject = shelf.genre_colors.find(gc => gc.genre === genre);
+
+        return res.status(200).json({ color: genreObject.color });
     
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
+
+app.get('/getBanners', async(req, res) => {
+
+    const {username, tab_name, volume_id} = req.query;
+
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        res.status(200).json(book.banner_items);
+
     } catch(e) {
         res.status(500).json({error: e});
     }

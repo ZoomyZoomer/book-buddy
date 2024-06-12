@@ -31,7 +31,6 @@ input[type="search"]::-webkit-search-cancel-button {
     justify-self: center;
     align-items: center;
     position: relative;
-    box-shadow: 2px 6px 10px #d4d4d4;
     z-index: 10;
 }
 
@@ -41,6 +40,13 @@ input[type="search"]::-webkit-search-cancel-button {
     background-color: #88D4AB;
     box-shadow: inset -10px 0 10px -10px #11723e;
     z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: "Inter";
+    font-size: 24px;
+    font-weight: 450;
 }
 
 .book_section {
@@ -49,17 +55,20 @@ input[type="search"]::-webkit-search-cancel-button {
     display: flex;
     flex-direction: column;
     position: relative;
+    transition: width 0.3s ease-in-out;
 }
 
 .stats_section {
-    display: flex;
-    justify-content: left;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: 100px;
     width: 20%;
     height: 100%;
     padding-top: 2px;
     box-sizing: border-box;
-    box-shadow: 10px 66px 16px #e0e0e0;
     z-index: 10;
+    position: relative;
+    transition: width 0.3s ease-in-out;
 }
 
 .search_container {
@@ -137,7 +146,8 @@ input[type="search"]::-webkit-search-cancel-button {
    grid-auto-rows: 220px;
    overflow-y: auto;
    overflow-x: hidden;
-   padding-left: 16px;
+   padding-left: 50px;
+   position: relative;
 }
 
 .folder-tab {
@@ -443,3 +453,56 @@ input[type="search"]::-webkit-search-cancel-button {
     width: 50px;
 }
 
+.overlay {
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000000;
+}
+
+.no_books_error {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    bottom: 130px;
+}
+
+.no_books_grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: center;
+    margin-right: 40px;
+    margin-top: 50px;
+    user-select: none;
+}
+
+.no_books_header {
+    font-family: "Inter";
+    color: #06AB78;
+    font-size: 36px;
+    font-weight: 600;
+}
+
+.no_books_subheader {
+    font-family: "Inter";
+    color: #000000;
+    font-size: 24px;
+    font-weight: 500;
+    margin-top: 16px;
+}
+
+.no_books_smallheader {
+    font-family: "Inter";
+    color: #626262;
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 4px;
+}
+
+.kitty_think {
+    height: 250px;
+}

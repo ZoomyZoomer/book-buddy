@@ -7,8 +7,9 @@ import {ReactComponent as ThreeDots} from '../threeDots.svg'
 import {ReactComponent as Checkmark} from '../checkmarkPages.svg'
 import {ReactComponent as DotsGrid} from '../dotsGrid.svg'
 import {ReactComponent as PlusPages} from '../plus-circle-svgrepo-com (1).svg'
+import Customize from './Customize'
 
-const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profileFetched, username, setActiveDropdown, activeDropdown}) => {
+const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profileFetched, username, setActiveDropdown, activeDropdown, setIsPopup}) => {
 
   const [isMounted, setIsMounted] = useState(true);
   const [fluidRating, setFluidRating] = useState(false);
@@ -29,6 +30,7 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
   const [bannerCoverTop, setBannerCoverTop] = useState(null);
   const [bannerPageTop, setBannerPageTop] = useState(null);
   const [bannerBookRight, setBannerBookRight] = useState(null);
+  const [isCustomizing, setIsCustomizing] = useState(false);
 
 
   const navigate = useNavigate('/');
@@ -248,12 +250,15 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
   })
 
 
-
   return (
     <>
+
       {isMounted && (
 
-        <div id={"container_" + index} className="bookitem_container">
+        <div id={"container_" + index} className="bookitem_container" onClick={() => navigate(`/book-contents/${volumeId}`)}>
+
+        
+
         <div className="book_cover">
           <img src={cover} draggable="false" />
           <div className="book_banner_right">
@@ -294,7 +299,7 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
               <ThreeDots />
               
             <div id={"dropdown_" + index} className={"book_options_dropdown_unactive"}>
-                <div className="option_customize_book">
+                <div className="option_customize_book" onClick={() => {setIsCustomizing(true); setIsPopup(true)}}>
                   Customize
                 </div>
 

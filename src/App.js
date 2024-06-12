@@ -7,6 +7,7 @@ import axios from 'axios'
 import ErrorPage from './pages/ErrorPage'
 import BookshelfPage from './pages/BookshelfPage'
 import AddBook from './pages/AddBook'
+import BookContents from './components/BookContents'
 
 axios.defaults.withCredentials = true;
 
@@ -21,6 +22,7 @@ function App() {
       <Route path="/register" element={<SignUpPage />} />
       <Route path="/bookshelf" element={<BookshelfPage />} />
       <Route path="/add-book/:tabName" element={<AddBook />} />
+      <Route path="/book-contents/:volume_id" element={<BookContents />} />
       <Route path="/error" element={<ErrorPage />} />
     </Routes>
 

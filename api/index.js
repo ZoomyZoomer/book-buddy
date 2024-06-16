@@ -9,11 +9,13 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-
+const OpenAI = require('openai');
+require('dotenv').config();
 
 app.use(express.json());
 app.use(cors({credentials:true, origin:'http://localhost:3000'}));
 app.use(cookieParser());
+
 
 mongoose.set('strictQuery', false);
 mongoose.connect("mongodb+srv://kcw90:oJQDQrLG9h466RKf@cluster0.ajxucqi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -418,6 +420,29 @@ app.get('/getBanners', async(req, res) => {
 
 })
 
+app.post('/openai-request', async (req, res) => {
+
+    const { question, title } = req.body;
+
+  
+    try {
+
+        const openai = new OpenAI();
+
+        const completion = await openai.chat.completions.create({
+            messages: [
+                { role: "system", content: `You are an expert on the book ${title}` },
+                { role: "user", content: question }
+            ],
+            model: "gpt-3.5-turbo",
+          });
+
+       res.status(200).json(completion.choices[0].message.content);
+    
+    } catch (error) {
+      res.status(500).json({ error: error.response ? error.response.data : error.message });
+    }
+  });
 
   
 

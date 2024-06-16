@@ -250,12 +250,22 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
   })
 
 
+  const check_redirect = (id) => {
+
+    if (id !== 'star'){
+      navigate(`/book-contents/${tabName}/${volumeId}`);
+    }
+
+  }
+  
+
+
   return (
     <>
 
       {isMounted && (
 
-        <div id={"container_" + index} className="bookitem_container" onClick={() => navigate(`/book-contents/${volumeId}`)}>
+        <div id={"container_" + index} className="bookitem_container" onClick={(e) => check_redirect(e.target.id)}>
 
         
 
@@ -266,7 +276,7 @@ const BookItem = ({title, author, cover, volumeId, genre, index, tabName, profil
           </div>
         </div>
         
-          <div className="book_contents">
+          <div className="book_contents" >
 
             <div className="book_title">
               {title}

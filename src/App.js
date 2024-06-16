@@ -22,7 +22,7 @@ function App() {
       <Route path="/register" element={<SignUpPage />} />
       <Route path="/bookshelf" element={<BookshelfPage />} />
       <Route path="/add-book/:tabName" element={<AddBook />} />
-      <Route path="/book-contents/:volume_id" element={<BookContents />} />
+      <Route path="/book-contents/:tab_name/:volume_id" element={<BookContents />} />
       <Route path="/error" element={<ErrorPage />} />
     </Routes>
 

@@ -1,54 +1,428 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import '../bookcontents_styles.css';
 import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
 import axios from 'axios';
+import RatingStatic from './RatingStatic';
+import { useNavigate } from 'react-router-dom';
+import {ReactComponent as SendIcon} from '../send_icon.svg'
+import {ReactComponent as AIWhite} from '../ai_icon_white.svg'
+import {ReactComponent as RefreshIcon} from '../refresh_icon.svg'
+import {ReactComponent as PhoneIcon} from '../phone_icon.svg'
+import {ReactComponent as ResizeIcon} from '../resize_icon.svg'
+import {ReactComponent as PencilIcon} from '../pencil_icon.svg'
+import {ReactComponent as SpeechIcon} from '../speech_icon.svg'
+import {ReactComponent as AttachIcon} from '../attach_icon.svg'
+import ChatMessage from './ChatMessage';
 
 function BookContents() {
-
-    const { volume_id } = useParams();
+    const { volume_id, tab_name } = useParams();
     const [bookData, setBookData] = useState(null);
+    const hasFetchedData = useRef(false);
+    const [rating, setRating] = useState(0);
+    const [userInfo, setUserInfo] = useState({});
+    const [infoLoading, setInfoLoading] = useState(true);
+    const [chatValue, setChatValue] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [callValue, setCallValue] = useState(0);
+    const navigate = useNavigate('/');
 
     const get_book_data = async() => {
-
         try {
-
-            const res = await axios.get(`https://www.googleapis.com/books/v1/volumes/${volume_id}`, {withCredentials: false});
+            const res = await axios.get(`https://www.googleapis.com/books/v1/volumes/${volume_id}`, { withCredentials: false });
             setBookData(res.data);
             console.log(res.data);
-
+            setInfoLoading(false);
         } catch(e) {
-            console.error({error: e});
+            console.error({ error: e });
         }
-
     }
 
+    const getRating = async(username) => {
+
+        const res = await axios.get('http://localhost:4000/getRating', {
+          params: {
+            tab_name: tab_name,
+            volume_id: volume_id,
+            username: username
+          }
+        })
+    
+        setRating(res.data);
+    
+      }
+    
     useEffect(() => {
+    const fetchProfile = async () => {
+        if (!hasFetchedData.current) {
+            try {
+                const response = await axios.get('http://localhost:4000/profile', {
+                withCredentials: true,
+                });
+                hasFetchedData.current = true;
+                setUserInfo(response.data.user);
+                get_book_data();
+                getRating(response.data.user.username);
 
-        get_book_data();
 
-    }, [])
+            } catch (error) {
+                // Check if error response status is 401
+                if (error.response && error.response.status === 401) {
+                // Navigate to the sign-in page
+                navigate('/signin');
+                } else {
+                // Handle other errors
+                console.error('Error fetching profile:', error);
+                }
+            }
+        }
+    };
 
-  return (
-    <div className="book_contents_container">
-        <div className="book_contents_navbar">
-            
-        </div>
-        <div className="book_contents_subcontainer">
-            <div className="book_info_container">
-                <div className="info_top_container">
-                    <img src={bookData?.volumeInfo?.imageLinks?.smallThumbnail} className="info_cover"/>
-                    <div className="info_top_grid">
-                            Test
+    fetchProfile();
+  }, [volume_id]);
+
+  function stripHTML(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || "";
+  }
+
+  const handle_send = () => {
+
+    document.getElementById("send_icon").classList.add("send_icon_filled");
+    askChatGPT(chatValue);
+
+  }
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [size, setSize] = useState({ width: '60%', height: '76%' });
+  const innerDivRef = useRef(null);
+  const outerDivRef = useRef(null);
+
+  const MIN_WIDTH = 400; // Minimum width in pixels
+  const MIN_HEIGHT = 400; // Minimum height in pixels
+
+  const handleMouseDown = (e) => {
+    if (e.target.classList.contains('resize-handle')) {
+      setIsResizing(true);
+    } else {
+      setIsDragging(true);
+      const innerDiv = innerDivRef.current;
+      const offsetX = e.clientX - innerDiv.offsetLeft;
+      const offsetY = e.clientY - innerDiv.offsetTop;
+      setPosition({ offsetX, offsetY });
+      document.getElementById("cb_nb").style.cursor = 'grabbing';
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      const outerDiv = outerDivRef.current;
+      const innerDiv = innerDivRef.current;
+      let x = e.clientX - position.offsetX;
+      let y = e.clientY - position.offsetY;
+
+      // Ensure the innerDiv stays within the bounds of outerDiv
+      x = Math.max(0, Math.min(x, outerDiv.clientWidth - innerDiv.clientWidth));
+      y = Math.max(0, Math.min(y, outerDiv.clientHeight - innerDiv.clientHeight));
+
+      innerDiv.style.left = `${x}px`;
+      innerDiv.style.top = `${y}px`;
+    } else if (isResizing) {
+      const outerDiv = outerDivRef.current;
+      const innerDiv = innerDivRef.current;
+      let newWidth = e.clientX - innerDiv.getBoundingClientRect().left;
+      let newHeight = e.clientY - innerDiv.getBoundingClientRect().top;
+
+      // Ensure the innerDiv does not go below the minimum dimensions
+      newWidth = Math.max(MIN_WIDTH, Math.min(newWidth, outerDiv.clientWidth - innerDiv.offsetLeft));
+      newHeight = Math.max(MIN_HEIGHT, Math.min(newHeight, outerDiv.clientHeight - innerDiv.offsetTop));
+
+      // Convert pixel values to percentages
+      const newWidthPercent = (newWidth / outerDiv.clientWidth) * 100;
+      const newHeightPercent = (newHeight / outerDiv.clientHeight) * 100;
+
+      setSize({ width: `${newWidthPercent}%`, height: `${newHeightPercent}%` });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setIsResizing(false);
+    document.getElementById("cb_nb").style.cursor = 'grab';
+  };
+
+  async function askChatGPT(question) {
+
+    setMessages((prevMessages) => [...prevMessages, {role: 'user', content: question}]);
+
+    const res = await axios.post('http://localhost:4000/openai-request', {
+        question: question,
+        title: bookData.volumeInfo.title
+    });
+
+    setMessages((prevMessages) => [...prevMessages, {role: 'ai', content: res.data}]);
+
+
+    document.getElementById("send_icon").classList.remove("send_icon_filled");
+    setChatValue('');
+
+  }
+
+    return (
+        <div className="book_contents_container">
+            {infoLoading && (
+                <>
+                <div className="book_contents_navbar"> </div>
+                <div className="loading_bar"><div class="lds-facebook"><div></div><div></div><div></div></div></div>
+                </>
+            )}
+            {!infoLoading && (
+            <>
+             <div className="book_contents_navbar">
+
+                <div className="books_contents_back_button" onClick={() => navigate(`/bookshelf`)}>
+                    Back
+                </div>
+
+                </div>
+                <div className="book_contents_subcontainer">
+                <div className="book_info_container">
+
+                    <div className="info_top_container">
+                        <img src={bookData?.volumeInfo?.imageLinks?.smallThumbnail} className="info_cover"/>
+                        <div className="info_top_grid">
+                            <div className="info_top_title">
+                                {bookData?.volumeInfo?.title}
+                                <div style={{marginLeft: '140px'}}>
+                                    <RatingStatic tabName={tab_name} volumeId={volume_id} rating={rating} />
+                                </div>
+                            </div>
+                            <div className="info_top_author">
+                                {bookData?.volumeInfo?.authors[0]}
+                            </div>
+
+
+                            <div className="info_top_divisor"/>
+
+
+                            <div className="reading_log_text">
+                                Reading Log
+                            </div>
+
+                            <div className="reading_log_flex">
+                                <div className="reading_log_grid">
+                                    <div className="reading_log_title">
+                                            STARTED
+                                    </div>
+                                    <div className="reading_log_subtext">
+                                        <div className="reading_log_subtext">
+                                                May 15
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="reading_log_divisor"/>
+
+                                <div className="reading_log_grid">
+                                    <div className="reading_log_title">
+                                            FINISHED
+                                    </div>
+                                    <div className="reading_log_subtext">
+                                        <div className="reading_log_subtext">
+                                                May 15
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="reading_log_divisor"/>
+
+                                <div className="reading_log_grid">
+                                    <div className="reading_log_title">
+                                            READ TIME
+                                    </div>
+                                    <div className="reading_log_subtext">
+                                        <div className="reading_log_subtext">
+                                                30 hrs
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="reading_log_divisor"/>
+
+                                <div className="reading_log_grid">
+                                    <div className="reading_log_title">
+                                            STATUS
+                                    </div>
+                                    <div className="reading_log_subtext">
+                                        <div className="reading_log_subtext">
+                                                <green>Finished</green>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            
+                        </div>
+                    </div>
+                    <div className="info_bottom_grid">
+
+                        <div className="info_bottom_flex">
+                            <div className="info_bottom_flex_left">
+                                Number of Pages
+                            </div>
+                            <div className="info_bottom_flex_right">
+                                {bookData?.volumeInfo?.pageCount}
+                            </div>
+                        </div>
+
+                        <div className="info_bottom_flex">
+                            <div className="info_bottom_flex_left">
+                                Language
+                            </div>
+                            <div className="info_bottom_flex_right">
+                            {bookData?.volumeInfo?.language === 'en' ? 'English' : bookData?.volumeInfo?.language}
+                            </div>
+                        </div>
+
+                        <div className="info_bottom_flex">
+                            <div className="info_bottom_flex_left">
+                                ISBN
+                            </div>
+                            <div className="info_bottom_flex_right">
+                                {bookData?.volumeInfo?.industryIdentifiers[0]?.identifier}
+                            </div>
+                        </div>
+
+                        <div className="info_bottom_flex">
+                            <div className="info_bottom_flex_left">
+                                Publisher
+                            </div>
+                            <div className="info_bottom_flex_right">
+                                {bookData?.volumeInfo?.publisher}
+                            </div>
+                        </div>
+
+                        <div className="info_bottom_flex">
+                            <div className="info_bottom_flex_left">
+                                Published Date
+                            </div>
+                            <div className="info_bottom_flex_right">
+                                {bookData?.volumeInfo?.publishedDate}
+                            </div>
+                        </div>
+
+                        <div className="info_bottom_flex">
+                            <div className="info_bottom_flex_left">
+                                Category(s)
+                            </div>
+                            <div className="info_bottom_flex_right">
+                               {bookData?.volumeInfo?.categories[0]}
+                            </div>
+                        </div>
+
+                        <div className="info_bottom_flex" style={{margin: '20px 0px 0px 0px'}}>
+                            <div className="info_bottom_flex_left">
+                                Book Lists
+                            </div>
+                            <div className="info_bottom_flex_right" onClick={() => navigate(`/bookshelf`)} style={{cursor: 'pointer', color: '#06AB78'}}>
+                                {tab_name} / ......
+                            </div>
+                        </div>
+
+                        <div className="info_bottom_flex_summary" >
+                            <div className="info_bottom_flex_left">
+                                Summary
+                            </div>
+                            <div className="summary_text">
+                                {stripHTML(bookData?.volumeInfo?.description)}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
-            <div className="ai_container">
 
-            </div>
+                <div className="contents_divisor" />
+
+                <div className="ai_container" id="outerDiv" ref={outerDivRef} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+                    <div className="chatbox_container" id="innerDiv" ref={innerDivRef} style={{width: size.width, height: size.height}}>
+                        <div id="cb_nb" className="chatbox_navbar" onMouseDown={handleMouseDown}>
+                            <div style={{display: 'flex', alignItems: 'center', pointerEvents: 'none'}} draggable={false}>
+                                <AIWhite />
+                            </div>
+                            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}} draggable={false}>
+                                ROBOT
+                            </div>
+                            <div className="chatbox_refresh" draggable={false} onClick={() => {setMessages([]); setCallValue(0)}}>
+                                <RefreshIcon />
+                            </div>
+                            <div className="chatbox_phone" draggable={false} onClick={() => {setMessages((prevMessages) => [...prevMessages, {role: 'ai', content: callValue === 0 ? "...Please don't call me T_T" : callValue === 1 ? "I said don't call me!" : callValue === 2 ? "K, I'll just ignore you": "..."}]); setCallValue((prevCallValue) => prevCallValue + 1)}}>
+                                <PhoneIcon />
+                            </div>
+                        </div>
+                        <div className="chatbox_contents">
+                            <div className="chat_section">
+                            {messages.map((msg, index) => (
+                                <ChatMessage key={index} role={msg.role} content={msg.content} />
+                            ))}
+                            {messages.length === 0 && (
+                                 <div className="template_container">
+                                 <div className="template" onClick={() => askChatGPT("What are the important takeways?")}>
+                                     <div style={{marginBottom: '20px'}}>
+                                         <PencilIcon />
+                                     </div>
+                                     <div style={{marginLeft: '6px'}}>
+                                     Important takeaways
+                                     </div>
+                                 </div>
+                                 <div className="template" onClick={() => askChatGPT("What are some character relationships?")}>
+                                     <div style={{marginBottom: '20px'}}>
+                                         <AttachIcon />
+                                     </div>
+                                     <div style={{marginLeft: '6px'}}>
+                                     Character relationships
+                                     </div>
+                                 </div>
+                                 <div className="template" onClick={() => askChatGPT("What books do you recommend that are similar?")}>
+                                     <div style={{marginBottom: '20px'}}>
+                                         <SpeechIcon />
+                                     </div>
+                                     <div style={{marginLeft: '6px'}}>
+                                     Recommend books
+                                     </div>
+                                 </div>
+                             </div>
+                            )}
+                           
+                            </div>
+                            <div className="message_section">
+                                <div className="input_box_container">
+                                    <input 
+                                        className="input_box"
+                                        placeholder='Send a message to AI'
+                                        onChange={(e) => setChatValue(e.target.value)}
+                                        value={chatValue}
+                                    
+                                    />
+                                    <div className="send_icon" onClick={() => handle_send()}>
+                                        <SendIcon />
+                                    </div>
+                                    
+                                </div>
+                                <div className="resize-handle" onMouseDown={handleMouseDown}><ResizeIcon /></div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            </>)}
+            
         </div>
-    </div>
-  )
+    )
 }
 
-export default BookContents
+export default BookContents;

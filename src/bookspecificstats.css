@@ -1,0 +1,151 @@
+.book_specific_statistics_container {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: left;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.book_specific_header {
+    color: #06AB78;
+    font-family: "Inter";
+    font-size: 22px;
+    font-weight: 600;
+    margin-left: 14px;
+    display: flex;
+    align-items: left;
+}
+
+.book_specific_subheader {
+    color: #454B54;
+    font-family: "Martel Sans";
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    margin-left: 14px;
+}
+
+.book_specific_graph {
+    height: 240px;
+    width: 70%;
+    background-color: white;
+    border-radius: 14px;
+}
+
+.book_specific_circle_graph {
+    height: 240px;
+    width: 20%;
+    background-color: white;
+    border-radius: 14px;
+    margin-left: 40px;
+}
+
+.book_flex {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.milestone_container {
+    height: 270px;
+    width: 94.5%;
+    background-color: white;
+    border-radius: 14px;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.milestone_real_container {
+    height: 100%;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.progress_bar_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30%;
+}
+
+.progress_bar {
+    width: 70%;
+    height: 16px;
+    background-color: #EFEFEF;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.package_container_1 {
+    position: absolute;
+    left: 5%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    top: -25px;
+}
+
+.package_container_2 {
+    position: absolute;
+    right: 58%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    top: -25px;
+}
+
+.package_container_3 {
+    position: absolute;
+    left: 58%;
+    bottom: -24px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.package_container_4 {
+    position: absolute;
+    right: 5%;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.package {
+    height: 60px;
+    width: 60px;
+    display: block;
+}
+
+.crate_drop {
+    height: 80px;
+    width: 80px;
+    display: block;
+}
+
+.crate_truck {
+    height: 70px;
+    width: 70px;
+    display: block; 
+}
+
+.percentage_read_text {
+    color: #454B54;
+    margin-top: 16px;
+}
+
+.tier_text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}

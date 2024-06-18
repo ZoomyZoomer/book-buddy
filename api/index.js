@@ -179,14 +179,14 @@ app.post('/addBook', async (req, res) => {
         if (!tab){
 
 
-            shelf.tabs.push({tab_name: tabName, books: [{volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages, banner_items: null}]});
+            shelf.tabs.push({tab_name: tabName, books: [{volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages, banner_items: null, reward_tiers_claimed: [false, false, false, false]}]});
             await shelf.save();
 
             res.status(201).json({message: "Tab created and book successfully added"});
 
         } else { // If the tab already exists, append to the book array
 
-            tab.books.push({volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages, banner_items: null});
+            tab.books.push({volume_id: volumeId, title: title, author: author, cover: cover, genre: genre[0], rating: 0, pages_read: 0, total_pages: pages, banner_items: null, reward_tiers_claimed: [false, false, false, false]});
             await shelf.save();
 
             res.status(201).json({message: "Book successfully added"});
@@ -420,7 +420,7 @@ app.get('/getBanners', async(req, res) => {
 
 })
 
-app.post('/openai-request', async (req, res) => {
+app.post('/openai-request', async(req, res) => {
 
     const { question, title } = req.body;
 
@@ -443,6 +443,46 @@ app.post('/openai-request', async (req, res) => {
       res.status(500).json({ error: error.response ? error.response.data : error.message });
     }
   });
+
+app.get('/fetch-tiers', async(req,res) => {
+
+    const {username, tab_name, volume_id} = req.query;
+
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        res.status(200).json(book.reward_tiers_claimed);
+
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
+
+app.post('/process-claim', async(req,res) => {
+
+    const {username, tab_name, volume_id, tier} = req.body;
+
+    try {
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        book.reward_tiers_claimed[tier - 1] = true;
+
+        await shelf.save();
+
+        res.status(201).json({message: "Tier successfully updated"});
+
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
 
   
 

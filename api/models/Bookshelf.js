@@ -49,7 +49,8 @@ const bookEntrySchema = new Schema({
       type: Number,
       min: 0
   },
-  banner_items: bannerSchema
+  banner_items: bannerSchema,
+  reward_tiers_claimed: []
 });
 
 const tabSchema = new Schema({

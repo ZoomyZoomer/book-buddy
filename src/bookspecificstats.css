@@ -22,7 +22,6 @@
     font-family: "Martel Sans";
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 10px;
     margin-left: 14px;
 }
 
@@ -48,7 +47,7 @@
 }
 
 .milestone_container {
-    height: 270px;
+    height: 300px;
     width: 94.5%;
     background-color: white;
     border-radius: 14px;
@@ -56,6 +55,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
 }
 
 .milestone_real_container {
@@ -69,10 +69,11 @@
     align-items: center;
     justify-content: center;
     height: 30%;
+    position: relative;
 }
 
 .progress_bar {
-    width: 70%;
+    width: 580px;
     height: 16px;
     background-color: #EFEFEF;
     border-radius: 20px;
@@ -81,66 +82,67 @@
     position: relative;
 }
 
-.package_container_1 {
+.progress_bar_filled {
     position: absolute;
-    left: 5%;
-    cursor: pointer;
+    width: 0px;
+    height: 16px;
+    background-color: #06AB78;
+    border-radius: 20px;
+}
+
+.rewards_container {
     display: flex;
-    align-items: center;
     justify-content: center;
-    flex-direction: column;
-    top: -25px;
-}
-
-.package_container_2 {
-    position: absolute;
-    right: 58%;
-    cursor: pointer;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    top: -25px;
+    margin-left: 26px;
 }
 
-.package_container_3 {
-    position: absolute;
-    left: 58%;
-    bottom: -24px;
+.package, .mail, .present, .suitcase {
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
 }
 
-.package_container_4 {
-    position: absolute;
-    right: 5%;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
+.package:hover, .mail:hover, .present:hover, .suitcase:hover{
+    transform: scale(1.05);
+    transition: transform 0.3s ease-in-out;
+    filter: saturate(1);
 }
+
 
 .package {
     height: 60px;
     width: 60px;
     display: block;
+    transition: transform 0.3s ease-in-out;
 }
 
-.crate_drop {
-    height: 80px;
-    width: 80px;
+.mail {
+    height: 50px;
+    width: 50px;
     display: block;
+    transition: transform 0.3s ease-in-out;
+    margin-top: 10px;
 }
 
-.crate_truck {
+.suitcase {
     height: 70px;
-    width: 70px;
     display: block; 
+    transition: transform 0.3s ease-in-out;
+    margin-top: -10px;
+}
+
+.present {
+    height: 60px;
+    display: block; 
+    transition: transform 0.3s ease-in-out;
+
 }
 
 .percentage_read_text {
     color: #454B54;
     margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tier_text {
@@ -148,4 +150,62 @@
     align-items: center;
     justify-content: center;
     font-weight: 600;
+    font-family: "Inter"
+}
+
+.tier_container {
+    position: absolute;
+    margin-left: 28px;
+    top: 20px;
+}
+
+.tier_object {
+    display: flex;
+    flex-direction: column;
+    max-width: fit-content;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+}
+
+.icon_holder {
+    position: relative;
+    margin-right: 60px;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.unavail_tier {
+    filter:saturate(0.6);
+}
+
+.note_text {
+    position: absolute;
+    bottom: 10px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+}
+
+.unclaimed_tier {
+    animation: unclaimedTier 2s infinite ease-in-out;
+}
+
+@keyframes unclaimedTier {
+    25%{
+        transform: rotate(25deg);
+    }
+    50%{
+        transform: rotate(0deg);
+    }
+    75%{
+        transform: rotate(-25deg);
+    }
+    100%{
+        transform: rotate(0deg);
+    }
 }

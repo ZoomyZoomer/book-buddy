@@ -336,28 +336,30 @@ app.post('/setPages', async (req, res) => {
     const {volume_id, tab_name, pages_read, username} = req.body;
 
     try {
-
         const shelf = await Bookshelf.findOne({ username: username });
+        if (!shelf) {
+            return res.status(404).json({ message: "Shelf not found" });
+        }
+    
         const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
-
+    
         if (!tab) {
-            res.status(500).json({message: "Requested tab not found"});
+            return res.status(500).json({ message: "Requested tab not found" });
         }
-
+    
         const book = tab.books.find(book => book.volume_id === volume_id);
-
+    
         if (!book) {
-            res.status(500).json({message: "Requested book not found"});
+            return res.status(500).json({ message: "Requested book not found" });
         }
-
+    
         book.pages_read = pages_read;
-
+    
         await shelf.save();
-
-        res.status(201).json({message: "Page count successfully updated"});
-
-    } catch(e) {
-        res.status(500).json({error: e});
+    
+        res.status(201).json({ message: "Page count successfully updated" });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 
 })
@@ -477,6 +479,33 @@ app.post('/process-claim', async(req,res) => {
         await shelf.save();
 
         res.status(201).json({message: "Tier successfully updated"});
+
+    } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
+
+app.post("/send-entry", async(req,res) => {
+
+    const {username, tab_name, volume_id, pages_added, total_pages_read} = req.body;
+
+    try{
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = now.getFullYear();
+
+        book.page_entries.push({pages_added: pages_added, new_page_total: total_pages_read, date: {month: month, day: day, year: year}});
+
+        shelf.save();
+
+        res.status(201).json({message: "Entry successfully recorded"});
 
     } catch(e) {
         res.status(500).json({error: e});

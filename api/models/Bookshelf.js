@@ -17,6 +17,31 @@ const bannerSchema = new Schema({
   book_right: bannerItemSchema
 })
 
+const pageEntrySchema = new Schema({
+  pages_added: {
+    type: Number,
+    required: true
+  },
+  new_page_total: {
+    type: Number,
+    required: true
+  },
+  date: {
+    month: {
+      type: String,
+      required: true
+    },
+    day: {
+      type: String,
+      required: true
+    },
+    year: {
+      type: String,
+      required: true
+    }
+  }
+})
+
 const bookEntrySchema = new Schema({
   volume_id: {
       type: String,
@@ -42,15 +67,14 @@ const bookEntrySchema = new Schema({
       max: 5
   },
   pages_read: {
-      type: Number,
-      min: 0
+      type: Number
   },
   total_pages: {
       type: Number,
-      min: 0
   },
   banner_items: bannerSchema,
-  reward_tiers_claimed: []
+  reward_tiers_claimed: [],
+  page_entries: [pageEntrySchema]
 });
 
 const tabSchema = new Schema({

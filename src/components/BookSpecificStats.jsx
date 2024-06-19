@@ -6,6 +6,12 @@ import {ReactComponent as StarIcon} from '../star_icon.svg'
 import {ReactComponent as Package} from '../package.svg'
 import {ReactComponent as CrateDrop} from '../crate_drop.svg'
 import {ReactComponent as CrateTruck} from '../crate_truck.svg'
+import {ReactComponent as BookIcon} from '../book_icon.svg'
+import {ReactComponent as PlusIcon} from '../plus_icon.svg'
+import {ReactComponent as MinusIcon} from '../minus_icon.svg'
+import {ReactComponent as FireIcon} from '../fire_icon.svg'
+import {ReactComponent as UpArrow} from '../up_arrow_icon.svg'
+import DonutChart from './DonutChart'
 
 function BookSpecificStats({volume_id, tab_name, username}) {
 
@@ -15,6 +21,11 @@ function BookSpecificStats({volume_id, tab_name, username}) {
     const [pages, setPages] = useState([]);
     const [percentage, setPercentage] = useState(0);
     const executed = useRef(false);
+    const [pageValue, setPageValue] = useState(0);
+
+    const handleChange = (event) => {
+        setPageValue(event.target.value);
+    };
 
     const getPages = async() => {
 
@@ -27,8 +38,10 @@ function BookSpecificStats({volume_id, tab_name, username}) {
         })
 
         setPages([res.data[0], res.data[1]]);
+        setPageValue(res.data[0]);
         setPercentage(res.data[0] / res.data[1]);
         setNumTiersCompleted(Math.floor((res.data[0] / res.data[1]) * 4));
+        fill_bar();
 
     }
 
@@ -58,11 +71,8 @@ function BookSpecificStats({volume_id, tab_name, username}) {
 
     }, [])
 
-
-    useEffect(() => {
-
-        console.log('ok')
-
+    const fill_bar = () => {
+        
         if (numTiersCompleted === 1){
             document.getElementById("bar_filled").style.width = (document.getElementById("bar_unfilled").clientWidth * 0.15) + 'px';
         } else if (numTiersCompleted === 2){
@@ -71,8 +81,16 @@ function BookSpecificStats({volume_id, tab_name, username}) {
             document.getElementById("bar_filled").style.width = (document.getElementById("bar_unfilled").clientWidth * 0.21 * numTiersCompleted) + 'px';
         } else if (numTiersCompleted === 4){
             document.getElementById("bar_filled").style.width = document.getElementById("bar_unfilled").clientWidth + 'px';
-        } 
+        } else {
+            document.getElementById("bar_filled").style.width = 0;
+        }
 
+    }
+
+
+    useEffect(() => {
+
+        fill_bar();
 
     }, [numTiersCompleted, windowResized])
 
@@ -103,6 +121,28 @@ function BookSpecificStats({volume_id, tab_name, username}) {
 
     }
 
+    const handle_set_pages = async() => {
+
+        await axios.post('http://localhost:4000/send-entry', {
+            volume_id,
+            tab_name,
+            username,
+            pages_added: Number(pageValue - pages[0]),
+            total_pages_read: pageValue
+        })
+
+    
+        await axios.post('http://localhost:4000/setPages', {
+            volume_id,
+            tab_name,
+            username,
+            pages_read: Number(pageValue)
+        })
+       
+        getPages();
+
+    }
+
 
   return (
     <div className="book_specific_statistics_container">
@@ -110,16 +150,80 @@ function BookSpecificStats({volume_id, tab_name, username}) {
         <div className="book_specific_header">
             Reading Progress
         </div>
-        <div className="book_specific_subheader">
-            Statistics
+        <div className="book_specific_subheader" style={{marginBottom: '20px'}}>
+            Page Statistics
         </div>
 
         <div className="book_flex">
-            <div className="book_specific_graph">
+            <div className="book_specific_pages">
+                <div className="book_container_header" style={{marginBottom: '10px'}}>
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <BookIcon />
+                    </div>
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        Create a new entry
+                    </div>
+                </div>
+                <div className="add_page_contents">
+                    <div className="page_counter">
 
+
+                        <div className="pages_read_text">
+                            {pageValue}
+                        </div>
+
+                        <div className="of_pages_text">
+                            of {pages[1]} pages
+                        </div>
+
+                    </div>
+
+                    
+
+                    <div className="slidecontainer">
+                        <div className="add_minus_icon" onClick={() => setPageValue(prevValue => prevValue > 0 ? Number(prevValue) - 1 : Number(prevValue))}>
+                            <MinusIcon />
+                        </div>
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max={pages[1]} 
+                            value={pageValue} 
+                            className="slider" 
+                            id="myRange" 
+                            onChange={handleChange}
+                        />
+                        <div className="add_minus_icon" onClick={() => setPageValue(prevValue => prevValue < pages[1] ? Number(prevValue) + 1 : Number(prevValue))}>
+                            <PlusIcon />
+                        </div>
+                    </div>
+
+                    <button className="submit_entry_button"onClick={() => handle_set_pages()}>Submit Entry</button>
+
+                </div>
             </div>
             <div className="book_specific_circle_graph">
-
+                <div className="completed_circle_text">
+                    <div>
+                        <FireIcon />
+                    </div>
+                    Completed
+                </div>
+                <DonutChart value={Math.floor(percentage * 100)} />
+                <div className="today_percentage_text">
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        Today
+                    </div>
+                    <div style={{marginLeft: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <green>45%</green>
+                    </div>
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px'}}>
+                        <UpArrow />
+                    </div>
+                </div>
+                <div className="circle_graph_percentage_text">
+                     {Math.floor(percentage * 100) + '%'}
+                </div>
             </div>
         </div>
 
@@ -127,10 +231,10 @@ function BookSpecificStats({volume_id, tab_name, username}) {
 
             <div className="milestone_real_container">
             
-                <div className="book_specific_header">
+                <div className="book_container_header">
                     <StarIcon /> Rewards Milestone
                 </div>
-                <div className="book_specific_subheader" style={{marginLeft: '45px', marginBottom: '16px'}}>
+                <div className="book_specific_subheader" style={{marginLeft: '45px', marginBottom: '20px'}}>
                     {numTiersCompleted} out of 4 rewards
                 </div>
 
@@ -196,6 +300,10 @@ function BookSpecificStats({volume_id, tab_name, username}) {
             Note: The final tier has a chance to contain rare banner decorations 0_o
             </div>
 
+        </div>
+
+        <div className="AI_icon">
+            <img src="/planet_icon.png" style={{height: '50px', width: '50px'}}/>
         </div>
 
     </div>

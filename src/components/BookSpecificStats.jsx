@@ -11,7 +11,9 @@ import {ReactComponent as PlusIcon} from '../plus_icon.svg'
 import {ReactComponent as MinusIcon} from '../minus_icon.svg'
 import {ReactComponent as FireIcon} from '../fire_icon.svg'
 import {ReactComponent as UpArrow} from '../up_arrow_icon.svg'
+import {ReactComponent as CloseIcon} from '../close_icon.svg'
 import DonutChart from './DonutChart'
+import BookEntryItem from './BookEntryItem'
 
 function BookSpecificStats({volume_id, tab_name, username}) {
 
@@ -22,6 +24,7 @@ function BookSpecificStats({volume_id, tab_name, username}) {
     const [percentage, setPercentage] = useState(0);
     const executed = useRef(false);
     const [pageValue, setPageValue] = useState(0);
+    const data= [0,1];
 
     const handleChange = (event) => {
         setPageValue(event.target.value);
@@ -303,7 +306,30 @@ function BookSpecificStats({volume_id, tab_name, username}) {
         </div>
 
         <div className="AI_icon">
-            <img src="/planet_icon.png" style={{height: '50px', width: '50px'}}/>
+            <div style={{position: 'relative', display: 'block'}}>
+                <img src="/planet_icon.png" style={{height: '50px', width: '50px', display: 'block', cursor: 'pointer'}}/>
+                <div className="AI_popup" style={{zIndex: '1000'}}>
+                    <div style={{position: 'relative'}}>
+                        Try out BookBot!
+                        <div style={{position: 'relative'}}>
+                            <div className="line_down" />
+                            <div className="dot" />
+                        </div>
+                        <div className="close_icon" onClick={() => document.getElementsByClassName("AI_popup")[0].classList.add("no_opacity")}>
+                            <CloseIcon />
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                
+            </div>
+        </div>
+
+        <div className="timeline_container">
+            {data.map((item, index) => (
+            <BookEntryItem index={index}/>
+            ))}
         </div>
 
     </div>

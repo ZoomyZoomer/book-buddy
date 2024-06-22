@@ -433,7 +433,7 @@ app.post('/openai-request', async(req, res) => {
 
         const completion = await openai.chat.completions.create({
             messages: [
-                { role: "system", content: `You are an expert on the book ${title}` },
+                { role: "system", content: `You are an expert on the book ${title} and talk in a semi-casual way` },
                 { role: "user", content: question }
             ],
             model: "gpt-3.5-turbo",
@@ -497,7 +497,8 @@ app.post("/send-entry", async(req,res) => {
         const book = tab.books.find(book => book.volume_id === volume_id);
 
         const now = new Date();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const month = monthNames[now.getMonth()]; // getMonth() returns 0-11, so this is correct
         const day = String(now.getDate()).padStart(2, '0');
         const year = now.getFullYear();
 
@@ -508,6 +509,38 @@ app.post("/send-entry", async(req,res) => {
         res.status(201).json({message: "Entry successfully recorded"});
 
     } catch(e) {
+        res.status(500).json({error: e});
+    }
+
+})
+
+app.get('/get-entry', async(req,res) => {
+
+    const {username, tab_name, volume_id, index} = req.query;
+
+    try{
+
+        const shelf = await Bookshelf.findOne({ username: username });
+        const tab = shelf.tabs.find(tab => tab.tab_name === tab_name);
+        const book = tab.books.find(book => book.volume_id === volume_id);
+
+        const entriesLength = book.page_entries.length;
+        const newIndex = entriesLength - 1 - index;
+
+        const pagesFrom0 = book.page_entries[newIndex].new_page_total - book.page_entries[newIndex].pages_added;
+        const pagesTo0 = book.page_entries[newIndex].new_page_total
+        const date0 = book.page_entries[newIndex].date.month + " " + book.page_entries[newIndex].date.day + ", " + book.page_entries[newIndex].date.year;
+        const percent0 = Math.floor(((pagesTo0 - pagesFrom0) / book.total_pages) * 100);
+
+        const pagesFrom1 = book.page_entries[newIndex - 1].new_page_total - book.page_entries[newIndex - 1].pages_added;
+        const pagesTo1 = book.page_entries[newIndex - 1].new_page_total;
+        const date1 = book.page_entries[newIndex - 1].date.month + " " + book.page_entries[newIndex - 1].date.day + ", " + book.page_entries[newIndex - 1].date.year;
+        const percent1 = Math.floor(((pagesTo1 - pagesFrom1) / book.total_pages) * 100);
+
+        res.status(200).json([{pages: `Pages ${pagesFrom0} - ${pagesTo0}`, date: date0, percent: percent0}, {pages: `Pages ${pagesFrom1} - ${pagesTo1}`, date: date1, percent: percent1}])
+
+
+    } catch(e){
         res.status(500).json({error: e});
     }
 

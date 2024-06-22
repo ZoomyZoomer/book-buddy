@@ -3,7 +3,7 @@ import {ReactComponent as BookIcon} from '../book_icon2.svg'
 import {ReactComponent as FireIcon} from '../fire_icon_white.svg'
 import '../bookspecificstats.css'
 
-function BookEntryItem({index}) {
+function BookEntryItem({index, pages, date, percent}) {
 
     const [showFire, setShowFire] = useState(false);
     const [showPercentage, setShowPercentage] = useState(false);
@@ -31,15 +31,15 @@ function BookEntryItem({index}) {
 
   return (
     <>
-        <div class="container" onMouseEnter={() => handleHover()} onMouseLeave={() => {setShowPercentage(false); setTimeout(() => {setShowFire(false)}, 300); document?.getElementById('fire' + `${index}`)?.classList?.add('no_opacity')}}>
+        <div class={"container" + " " + "slideInAnimation"} onMouseEnter={() => handleHover()} onMouseLeave={() => {setShowPercentage(false); setTimeout(() => {setShowFire(false)}, 300); document?.getElementById('fire' + `${index}`)?.classList?.add('no_opacity')}}>
             <div class="main-box">
                 <div class="box-content">
                 <div class="svg">
                     <BookIcon />
                 </div>
                 <div class="text">
-                    <div class="title">Pages 137 - 187 </div>
-                    <div style={{display: 'flex', alignItems: 'left', justifyContent: 'left', fontWeight: '600', color: '#454B54'}}>May 6, 2024</div>
+                    <div class="title">{pages} </div>
+                    <div style={{display: 'flex', alignItems: 'left', justifyContent: 'left', fontWeight: '600', color: '#454B54'}}>{date}</div>
                 </div>
                 <div class="dots">
                     <div></div>
@@ -51,8 +51,8 @@ function BookEntryItem({index}) {
             </div>
 
             <div className={"fire_percent"}>
-                {showFire ? (<div id={"fire" + `${index}`} style={{display: 'grid', justifyContent: 'center', alignItems: 'center', bottom: '40px', color: 'white', fontFamily: "Inter"}}><FireIcon /><div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>Streak!!!</div></div>) : ''}
-                {showPercentage ? (<div id={"percent" + `${index}`} style={{fontSize: '36px', fontWeight: '600', marginTop: '20px', marginLeft: '10px', color: 'white', fontFamily: "Inter"}}>7%</div>): ''}
+                {showFire ? (<div id={"fire" + `${index}`} style={{display: 'grid', justifyContent: 'center', alignItems: 'center', marginTop: '10px', color: 'white', fontFamily: "Inter"}}><FireIcon /><div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '14px'}}>Streak!!!</div></div>) : ''}
+                {showPercentage ? (<div id={"percent" + `${index}`} style={{fontSize: '28px', fontWeight: '600', marginTop: '24px', marginLeft: '0px', color: 'white', fontFamily: "Inter"}}>{percent}%</div>): ''}
             </div>
 
         </div>

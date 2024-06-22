@@ -2,7 +2,9 @@ import React from 'react'
 
 function RobotChat() {
   return (
-    <div className="ai_container" id="outerDiv" ref={outerDivRef} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+    <>
+    </>
+    /*<div className="ai_container" id="outerDiv" ref={outerDivRef} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
                     <div className="chatbox_container" id="innerDiv" ref={innerDivRef} style={{width: size.width, height: size.height}}>
                         <div id="cb_nb" className="chatbox_navbar" onMouseDown={handleMouseDown}>
                             <div style={{display: 'flex', alignItems: 'center', pointerEvents: 'none'}} draggable={false}>
@@ -73,7 +75,7 @@ function RobotChat() {
 
                         </div>
                     </div>
-                </div>
+                </div>*/ 
   )
 }
 

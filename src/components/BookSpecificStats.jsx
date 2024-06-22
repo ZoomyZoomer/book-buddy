@@ -12,10 +12,12 @@ import {ReactComponent as MinusIcon} from '../minus_icon.svg'
 import {ReactComponent as FireIcon} from '../fire_icon.svg'
 import {ReactComponent as UpArrow} from '../up_arrow_icon.svg'
 import {ReactComponent as CloseIcon} from '../close_icon.svg'
+import {ReactComponent as ArrowLeft} from '../arrow_left_icon.svg'
 import DonutChart from './DonutChart'
 import BookEntryItem from './BookEntryItem'
+import AIChat from './AIChat'
 
-function BookSpecificStats({volume_id, tab_name, username}) {
+function BookSpecificStats({volume_id, tab_name, username, title}) {
 
     const [tierClaimed, setTierClaimed] = useState([false, false, false, false]);
     const [numTiersCompleted, setNumTiersCompleted] = useState(0);
@@ -23,7 +25,13 @@ function BookSpecificStats({volume_id, tab_name, username}) {
     const [pages, setPages] = useState([]);
     const [percentage, setPercentage] = useState(0);
     const executed = useRef(false);
+    const getEntries = useRef(false);
     const [pageValue, setPageValue] = useState(0);
+    const [entryCount, setEntryCount] = useState(0);
+    const [entries, setEntries] = useState([]);
+    const [index, setIndex] = useState(0);
+    const [showAIIcon, setShowAIIcon] = useState(true);
+    const [showAIChat, setShowAIChat] = useState(false);
     const data= [0,1];
 
     const handleChange = (event) => {
@@ -141,14 +149,80 @@ function BookSpecificStats({volume_id, tab_name, username}) {
             username,
             pages_read: Number(pageValue)
         })
-       
+
+        getEntries.current = false;
+        setEntryCount(prevCount => prevCount + 1);
         getPages();
+
+    }
+
+    const read_entry = async() => {
+
+        const res = await axios.get('http://localhost:4000/get-entry', {
+            params: {
+                volume_id,
+                tab_name,
+                username,
+                index
+            }
+        })
+
+        setEntries(res.data);
+
+    }
+
+    useEffect(() => {
+
+        console.log("");
+        if (!getEntries.current){
+            read_entry();
+            getEntries.current = true;
+        }
+
+    }, [entryCount, index])
+
+    const handle_entry_render = () => {
+
+        getEntries.current = false;
+
+        Array.from(document.getElementsByClassName("slideInAnimation")).forEach((item, index) => {
+            item.classList.remove("slideInAnimation");
+            setTimeout(() => {
+                item.classList.add("slideInAnimation");
+            }, 10)
+            
+        });
+
+        setIndex(prevIndex => prevIndex + 1);
+
+    }
+
+    const handle_AI_chat = () => {
+
+            setShowAIChat(true);
+            document.getElementsByClassName("AI_icon")[0].classList.add("smallAnim");
+            
+            setTimeout(() => {
+
+                setShowAIIcon(false);
+
+            }, 994)
+
+    }
+
+    const handleClick = (e) => {
+
+        if(e.target.id === "input_container"){
+            document?.getElementById("shadow_container")?.classList?.add("input_boxshadow");
+        } else {
+            document?.getElementById("shadow_container")?.classList?.remove("input_boxshadow");
+        }
 
     }
 
 
   return (
-    <div className="book_specific_statistics_container">
+    <div className="book_specific_statistics_container" onClick={(e) => handleClick(e)}>
 
         <div className="book_specific_header">
             Reading Progress
@@ -305,9 +379,10 @@ function BookSpecificStats({volume_id, tab_name, username}) {
 
         </div>
 
-        <div className="AI_icon">
+        {showAIIcon && (
+            <div className="AI_icon">
             <div style={{position: 'relative', display: 'block'}}>
-                <img src="/planet_icon.png" style={{height: '50px', width: '50px', display: 'block', cursor: 'pointer'}}/>
+                <img className="planet" src="/planet_icon.png" style={{height: '50px', width: '50px', display: 'block', cursor: 'pointer'}} onClick={(e) => handle_AI_chat(e.target.id)}/>
                 <div className="AI_popup" style={{zIndex: '1000'}}>
                     <div style={{position: 'relative'}}>
                         Try out BookBot!
@@ -315,21 +390,39 @@ function BookSpecificStats({volume_id, tab_name, username}) {
                             <div className="line_down" />
                             <div className="dot" />
                         </div>
-                        <div className="close_icon" onClick={() => document.getElementsByClassName("AI_popup")[0].classList.add("no_opacity")}>
+                        <div id='close' className="close_icon" onClick={() => document.getElementsByClassName("AI_popup")[0].classList.add("no_opacity")}>
                             <CloseIcon />
                         </div>
                     </div>
                     
                     
                 </div>
-                
             </div>
         </div>
+        )}
+
+        {showAIChat && <div className="chat_rectangle"><AIChat setShowAIIcon={setShowAIIcon} setShowAIChat={setShowAIChat} title={title}/></div>}
 
         <div className="timeline_container">
-            {data.map((item, index) => (
-            <BookEntryItem index={index}/>
-            ))}
+                <div style={{display: 'flex', flexDirection: 'column', marginBottom: '20px'}}>
+                    <div className="book_specific_header">
+                        Reading Timeline
+                    </div>
+                    <div className="book_specific_subheader">
+                        From most recent
+                    </div>
+                </div>
+
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', position: "relative", boxSizing: 'border-box'}}>
+                    <div className="arrow_left" onClick={() => handle_entry_render()}>
+                        <ArrowLeft />
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: '136px'}}>
+                        {entries.map((item, index) => (
+                        item.percent !== 0 ? <BookEntryItem index={index} pages={item.pages} date={item.date} percent={item.percent}/> : <div className></div>
+                        ))}
+                    </div>
+                </div>
         </div>
 
     </div>

@@ -337,7 +337,7 @@ function BookContents() {
                     </div>
                 </div>
 
-                <BookSpecificStats volume_id={volume_id} tab_name={tab_name} username={userInfo.username}/>
+                <BookSpecificStats volume_id={volume_id} tab_name={tab_name} username={userInfo.username} title={bookData.volumeInfo.title}/>
 
                 </div>
             </>)}
